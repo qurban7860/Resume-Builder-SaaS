@@ -1,10 +1,10 @@
-import { renderResumeHTMLBody, pageStyle } from '@/lib/pdfTemplate';
+import { renderResumeHTML } from '@/lib/pdfTemplate';
 
-export async function exportResumeToPDF(resume: any, filename: string) {
+export async function exportResumeToPDF(resume: any, filename: string, templateId: string = 'classic') {
   try {
     const { default: html2pdf } = await import('html2pdf.js');
 
-    const htmlFragment = renderResumeHTMLBody(resume);
+    const html = renderResumeHTML(resume, templateId);
     
     // Create element with styles and resume-container wrapper
     const wrapper = document.createElement('div');
@@ -13,12 +13,7 @@ export async function exportResumeToPDF(resume: any, filename: string) {
     wrapper.style.left = '-9999px';
     wrapper.style.width = '210mm'; // Standard A4 width (793.7px at 96 DPI)
     
-    wrapper.innerHTML = `
-      <style>${pageStyle}</style>
-      <div class="resume-container" style="box-shadow: none; border-radius: 0; padding: 0;">
-        ${htmlFragment}
-      </div>
-    `;
+    wrapper.innerHTML = html;
     
     document.body.appendChild(wrapper);
 

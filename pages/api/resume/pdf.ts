@@ -11,13 +11,13 @@ export default async function handler(
   }
 
   try {
-    const { resume, filename } = req.body;
+    const { resume, filename, templateId } = req.body;
 
     if (!resume) {
       return res.status(400).json({ error: 'Resume payload required' });
     }
 
-    const html = renderResumeHTML(resume);
+    const html = renderResumeHTML(resume, templateId || 'classic');
 
     const browser = await puppeteer.launch({
       headless: 'new',

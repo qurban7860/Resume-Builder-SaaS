@@ -1,11 +1,8 @@
 import React from 'react';
-import { Header } from './Header';
-import { Summary } from './Summary';
-import { Experience } from './Experience';
-import { Projects } from './Projects';
-import { Skills } from './Skills';
-import { Education } from './Education';
-import { LeadershipAwards } from './LeadershipAwards';
+import { useTemplateStore } from '@/store/useTemplateStore';
+import { ClassicTemplate } from './templates/ClassicTemplate';
+import { ModernTemplate } from './templates/ModernTemplate';
+import { ExecutiveTemplate } from './templates/ExecutiveTemplate';
 
 interface Resume {
   basics: {
@@ -37,66 +34,27 @@ interface ResumeRendererProps {
 
 export const ResumeRenderer = React.memo(
   ({ resume, printMode = false }: ResumeRendererProps) => {
+    const { templateId } = useTemplateStore();
+
     if (!resume) {
       return (
-        <div className="flex items-center justify-center h-screen">
-          <p className="text-lg text-text-light">No resume data available</p>
+        <div className="flex items-center justify-center h-64">
+          <p className="text-lg text-gray-400">No resume data available</p>
         </div>
       );
     }
 
-    const courseNames = resume.sections.relevantCoursework?.items?.map((i: any) => i.name) || [];
-    const fallbackCoursework = courseNames.join(', ');
+    const containerClass = printMode
+      ? 'w-full h-full p-4 bg-white'
+      : 'bg-white max-w-4xl mx-auto my-4 shadow-lg rounded-lg p-8';
+
+    const templateProps = { resume };
 
     return (
-      <div
-        className={`bg-white ${
-          printMode
-            ? 'w-full h-full p-4'
-            : 'max-w-4xl mx-auto my-8 shadow-lg p-8 rounded-lg'
-        }`}
-        style={{
-          fontFamily: 'Georgia, "Times New Roman", Times, serif',
-        }}
-      >
-        {/* Header */}
-        <Header
-          name={resume.basics.name}
-          headline={resume.basics.headline}
-          email={resume.basics.email}
-          phone={resume.basics.phone}
-          location={resume.basics.location}
-          linkedin={resume.basics.linkedin}
-          github={resume.basics.github}
-          website={resume.basics.url?.href}
-        />
-
-        {/* Summary */}
-        <Summary content={resume.sections.summary?.content} />
-
-        {/* Vertical Single-Column Flow */}
-        <div className="space-y-4">
-          {/* Education */}
-          <Education 
-            items={resume.sections.education.items} 
-            fallbackCoursework={fallbackCoursework}
-          />
-
-          {/* Skills */}
-          <Skills items={resume.sections.skills.items} />
-
-          {/* Experience */}
-          <Experience items={resume.sections.experience.items} />
-
-          {/* Projects */}
-          <Projects items={resume.sections.projects.items} />
-
-          {/* Leadership & Awards */}
-          <LeadershipAwards 
-            achievements={resume.sections.achievements?.items || []} 
-            certifications={resume.sections.certifications?.items || []}
-          />
-        </div>
+      <div className={containerClass}>
+        {templateId === 'modern'    && <ModernTemplate    {...templateProps} />}
+        {templateId === 'executive' && <ExecutiveTemplate {...templateProps} />}
+        {(templateId === 'classic' || !templateId) && <ClassicTemplate {...templateProps} />}
       </div>
     );
   }

@@ -114,14 +114,14 @@ export const pageStyle = `
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: #111111;
-    margin-top: 18px;
-    margin-bottom: 6px;
+    margin-top: 14px;
+    margin-bottom: 5px;
     padding-bottom: 2px;
     border-bottom: 1px solid #111111;
   }
 
   .section-block {
-    margin-bottom: 10px;
+    margin-bottom: 7px;
   }
 
   .item-row {
@@ -174,7 +174,7 @@ export const pageStyle = `
     font-size: 11px;
     line-height: 1.5;
     color: #222222;
-    margin-bottom: 3px;
+    margin-bottom: 2.5px;
     display: list-item;
   }
 
@@ -305,12 +305,12 @@ function renderResumeBodyHTML(resume: any) {
       return `
         <div class="section-block">
           <div class="item-row">
-            <div class="item-left">${companyMarkup}</div>
+            <div class="item-left">
+              ${companyMarkup}
+              ${item.title ? `<span class="italic" style="font-weight: normal; color: #444444;"> | ${escapeHtml(item.title)}</span>` : ''}
+              ${item.location ? `<span style="font-weight: normal; color: #777777;"> | ${escapeHtml(item.location)}</span>` : ''}
+            </div>
             <div class="item-right">${escapeHtml(item.startDate)} – ${escapeHtml(item.endDate)}</div>
-          </div>
-          <div class="item-row">
-            <div class="item-left"><span class="italic">${escapeHtml(item.title)}</span></div>
-            ${item.location ? `<div class="item-right" style="font-weight: normal; font-style: italic;">${escapeHtml(item.location)}</div>` : ''}
           </div>
           <div style="margin-top: 2px;">
             ${summaryMarkup}
@@ -433,18 +433,138 @@ function renderResumeBodyHTML(resume: any) {
   `;
 }
 
-export function renderResumeHTML(resume: any) {
+
+// ─── Template-specific CSS overrides ─────────────────────────────────────────
+const modernPageStyle = `
+  html, body {
+    font-family: "Inter", "Segoe UI", "Helvetica Neue", Arial, sans-serif !important;
+    color: #1e1b4b;
+  }
+  .resume-container { background: #ffffff; }
+  .header { border-bottom: 3px solid #4f46e5; padding-bottom: 8px; margin-bottom: 10px; }
+  .header h1 { font-family: "Inter", "Segoe UI", sans-serif; color: #0f172a; font-size: 26px; }
+  .header .headline { color: #4f46e5; }
+  .header .contact-row { color: #475569; }
+  .header .contact-row a { color: #4f46e5; }
+  .section-title {
+    font-family: "Inter", "Segoe UI", sans-serif;
+    font-size: 11px;
+    color: #4f46e5;
+    border-bottom: 2px solid #4f46e5;
+    letter-spacing: 0.12em;
+    margin-top: 14px;
+    margin-bottom: 5px;
+  }
+  .item-left { font-family: "Inter", "Segoe UI", sans-serif; color: #0f172a; }
+  .item-right { font-family: "Inter", "Segoe UI", sans-serif; color: #64748b; font-weight: 600; }
+  .skills-row { font-family: "Inter", "Segoe UI", sans-serif; color: #374151; }
+  li { font-family: "Inter", "Segoe UI", sans-serif; color: #374151; }
+`;
+
+const executivePageStyle = `
+  html, body { font-family: Georgia, "Times New Roman", serif; color: #2d2d2d; }
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 1.5px double #6b21a8;
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+    text-align: left;
+  }
+  .header h1 { font-size: 26px; color: #1a0a2e; letter-spacing: -0.01em; text-align: left; margin-bottom: 3px; }
+  .header .headline { color: #3b0764; letter-spacing: 0.04em; text-align: left; }
+  .header-left { flex: 1; padding-right: 16px; }
+  .header-right { display: flex; flex-direction: column; align-items: flex-end; gap: 3px; font-size: 10px; color: #6b7280; }
+  .header-right a { color: #3b0764; text-decoration: none; display: inline-flex; align-items: center; }
+  .contact-row { display: none; }
+  .section-title {
+    color: #3b0764;
+    font-size: 10.5px;
+    border-bottom: none;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 14px;
+    margin-bottom: 5px;
+  }
+  .section-title::before, .section-title::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: #d1d5db;
+  }
+  .item-right { font-style: italic; font-weight: normal; color: #6b7280; }
+`;
+
+function renderExecutiveHeader(basics: any): string {
+  const contactParts: string[] = [];
+  if (basics.location) contactParts.push(`<span style="display:inline-flex;align-items:center;">${locationSvg}<span>${escapeHtml(basics.location)}</span></span>`);
+  if (basics.phone)    contactParts.push(`<a href="tel:${escapeHtml(basics.phone)}" style="display:inline-flex;align-items:center;">${phoneSvg}<span>${escapeHtml(basics.phone)}</span></a>`);
+  if (basics.email)    contactParts.push(`<a href="mailto:${escapeHtml(basics.email)}" style="display:inline-flex;align-items:center;">${emailSvg}<span>${escapeHtml(basics.email)}</span></a>`);
+  if (basics.linkedin) contactParts.push(`<a href="${escapeHtml(basics.linkedin)}" style="display:inline-flex;align-items:center;">${linkedinSvg}<span>${escapeHtml(getLinkedinDisplay(basics.linkedin))}</span></a>`);
+  if (basics.github)   contactParts.push(`<a href="${escapeHtml(basics.github)}" style="display:inline-flex;align-items:center;">${githubSvg}<span>${escapeHtml(getGithubDisplay(basics.github))}</span></a>`);
+  if (basics.url?.href) contactParts.push(`<a href="${escapeHtml(basics.url.href)}" style="display:inline-flex;align-items:center;">${websiteSvg}<span>${escapeHtml(getWebsiteDisplay(basics.url.href))}</span></a>`);
+  return `
+    <div class="header" style="display:flex;justify-content:space-between;align-items:flex-start;border-bottom:1.5px double #6b21a8;padding-bottom:8px;margin-bottom:10px;text-align:left;">
+      <div style="flex:1;padding-right:16px;">
+        <h1 style="font-size:26px;font-weight:700;color:#1a0a2e;letter-spacing:-0.01em;line-height:1.1;margin:0 0 3px;">${escapeHtml(basics.name)}</h1>
+        ${basics.headline ? `<div style="font-size:11.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.04em;color:#3b0764;">${escapeHtml(basics.headline)}</div>` : ''}
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-end;gap:3px;font-size:10px;color:#6b7280;flex-shrink:0;">
+        ${contactParts.join('')}
+      </div>
+    </div>`;
+}
+
+export function renderResumeHTML(resume: any, templateId: string = 'classic') {
+  const basics = resume.basics || {};
+  let extraStyle = '';
+  let headerHTML = '';
+
+  if (templateId === 'modern') {
+    extraStyle = modernPageStyle;
+    // Standard centered header with modern overrides
+    const contactParts: string[] = [];
+    if (basics.location) contactParts.push(`<span style="display:inline-flex;align-items:center;">${locationSvg}<span>${escapeHtml(basics.location)}</span></span>`);
+    if (basics.phone)    contactParts.push(`<a href="tel:${escapeHtml(basics.phone)}" style="display:inline-flex;align-items:center;">${phoneSvg}<span>${escapeHtml(basics.phone)}</span></a>`);
+    if (basics.email)    contactParts.push(`<a href="mailto:${escapeHtml(basics.email)}" style="display:inline-flex;align-items:center;">${emailSvg}<span>${escapeHtml(basics.email)}</span></a>`);
+    if (basics.linkedin) contactParts.push(`<a href="${escapeHtml(basics.linkedin)}" style="display:inline-flex;align-items:center;color:#4f46e5;">${linkedinSvg}<span>${escapeHtml(getLinkedinDisplay(basics.linkedin))}</span></a>`);
+    if (basics.github)   contactParts.push(`<a href="${escapeHtml(basics.github)}" style="display:inline-flex;align-items:center;color:#4f46e5;">${githubSvg}<span>${escapeHtml(getGithubDisplay(basics.github))}</span></a>`);
+    if (basics.url?.href) contactParts.push(`<a href="${escapeHtml(basics.url.href)}" style="display:inline-flex;align-items:center;color:#4f46e5;">${websiteSvg}<span>${escapeHtml(getWebsiteDisplay(basics.url.href))}</span></a>`);
+    const contactRowHTML = contactParts.join(' <span style="color:#cbd5e1;margin:0 2px;">|</span> ');
+    headerHTML = `
+      <div class="header">
+        <h1>${escapeHtml(basics.name)}</h1>
+        ${basics.headline ? `<p class="headline">${escapeHtml(basics.headline)}</p>` : ''}
+        <p class="contact-row">${contactRowHTML}</p>
+      </div>`;
+  } else if (templateId === 'executive') {
+    extraStyle = executivePageStyle;
+    headerHTML = renderExecutiveHeader(basics);
+  } else {
+    // Classic — use default header from body render
+    headerHTML = '';
+  }
+
+  const bodyHTML = renderResumeBodyHTML(resume);
+  // For executive/modern, replace the header in the body output
+  const finalBody = (templateId === 'executive' || templateId === 'modern')
+    ? headerHTML + bodyHTML.replace(/<div class="header">[\s\S]*?<\/div>\s*(?=\n|<div)/, '')
+    : bodyHTML;
+
   return `<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>${escapeHtml(resume.basics?.name || 'Resume')}</title>
-    <style>${pageStyle}</style>
+    <title>${escapeHtml(basics.name || 'Resume')}</title>
+    <style>${pageStyle}${extraStyle}</style>
   </head>
   <body>
     <div class="resume-container">
-      ${renderResumeBodyHTML(resume)}
+      ${finalBody}
     </div>
   </body>
 </html>`;

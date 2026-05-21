@@ -1,13 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useResumeStore } from '@/store/useResumeStore';
+import { useTemplateStore } from '@/store/useTemplateStore';
 import { ResumeRenderer } from '@/components/resume/ResumeRenderer';
 import { ResumeEditor } from '@/components/editor/ResumeEditor';
 import resumeData from '@/data/resume.json';
 import { exportResumeToPDF } from '@/lib/pdfExport';
 import { AtsFeedbackWidget } from '@/components/resume/AtsFeedbackWidget';
+import { TemplatePicker } from '@/components/resume/TemplatePicker';
 
 export default function Dashboard() {
   const { resume, setResume, getScore } = useResumeStore();
+  const { templateId } = useTemplateStore();
   const [score, setScore] = useState(0);
   const [loading, setLoading] = useState(true);
 
@@ -33,7 +36,7 @@ export default function Dashboard() {
       const response = await fetch('/api/resume/pdf', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ resume, filename }),
+        body: JSON.stringify({ resume, filename, templateId }),
       });
 
       if (!response.ok) {
@@ -54,7 +57,7 @@ export default function Dashboard() {
       console.warn('Server PDF export failed; falling back to client-side PDF export.', error);
       try {
         if (!resume) return;
-        await exportResumeToPDF(resume, `${resume.basics.name.replace(/\s+/g, '-')}-resume.pdf`);
+        await exportResumeToPDF(resume, `${resume.basics.name.replace(/\s+/g, '-')}-resume.pdf`, templateId);
       } catch (fallbackError) {
         console.error('Client-side PDF fallback failed:', fallbackError);
         alert('Failed to export PDF. Please try again or use a different browser.');
@@ -104,6 +107,9 @@ export default function Dashboard() {
           {/* Editor Column */}
           <div className="space-y-6">
             <ResumeEditor />
+
+            {/* Template Picker */}
+            <TemplatePicker />
 
             <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Resume Status</h2>
