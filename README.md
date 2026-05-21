@@ -1,66 +1,90 @@
-# 🚀 ResumeBuilder Pro — Elite FAANG-Standard ATS Engine
+# ResumeBuilder SaaS
 
-ResumeBuilder Pro is a standard-setting, highly optimized dual-pane workstation designed to build pixel-perfect, **top 1% ATS-optimized professional resumes**. Engineered with React, Next.js, Zustand, and Puppeteer, it ensures your resume bypasses corporate automated filters and catches recruiters' attention.
+ResumeBuilder is a professional-grade resume platform built with Next.js, React, Zustand, and Tailwind CSS. It combines a recruiter-aware editor, ATS-aware scoring, document parsing, and PDF export into a single modern workspace.
 
----
+## What this project includes
 
-## 🔥 Key Upgrades & Capabilities
+- Dual-pane editor with live resume preview and editable resume sections
+- ATS score engine with completeness, keyword, and format feedback
+- Resume upload and parsing for PDF/DOCX/TXT files
+- AI-assisted enhancement for bullets, summaries, and keyword suggestions
+- Responsive SaaS-style UI with premium layout, glassmorphism cards, and motion transitions
+- PDF export workflow with server-side and client-side fallback support
+- Recruiter-focused optimization guidance and heatmap visualization
+- Local draft persistence and version snapshots
 
-* 🎯 **Figma-Style Workspace & Zoom Engine**: Sleek dot-blueprint canvas featuring a reactive Figma-style zoom controller (`-`, `+`, `Fit`) that dynamically fits the locked A4 sheet into any device window with zero layout shift.
-* ⚡ **Sleek Accordion Editor Stack**: Highly responsive split-screen accordion stack featuring rotating chevrons, completion indicators, and beautiful inline SVG icons to eliminate scroll fatigue.
-* 🔮 **Premium Focus Glow UI**: Sleek modern Indigo-focus glow inputs (`focus:ring-indigo-100 focus:border-indigo-500`) and modern responsive typography.
-* 🛡️ **FAANG-Grade ATS Scoring (0-100)**: Real-time scoring algorithm checking document completeness, email details, experience lists, and tech skills to give you instant feedback.
-* 📥 **Hybrid Dual-Engine PDF Export**: Zero-latency client-side PDF downloads (`html2pdf.js`) with high-fidelity Puppeteer server-side fallback for exact print dimension accuracy.
-* 📦 **Zustand Real-Time Store**: Infinite client-side performance, local state-based memoization, and automatic drafts persistence.
+## Core product features
 
----
+### Editor & workflow
+- Structured resume editor with experience, education, skills, projects, and certifications
+- Live preview of an A4 resume layout with zoom and fit controls
+- Template switching and recruiter-friendly formatting
+- Keyboard shortcuts for export, snapshots, and workflow toggles
 
-## 🛠️ High-Performance Tech Stack
+### ATS & recruiter intelligence
+- Real-time ATS scoring and feedback widget
+- Recruiter heatmap visualization for quick scan behavior
+- Weak section warnings and document completeness indicators
+- Industry-style writing guidance and impact-focused phrasing
 
-* **Frontend**: Next.js 14 (Pages Router) + React 18
-* **State Engine**: Zustand 4 (Reactive global state)
-* **Styling**: Tailwind CSS + Pure Custom HSL CSS
-* **Schema Validation**: Zod + React Hook Form
-* **PDF Compile Engine**: Puppeteer + html2pdf.js
-* **Language**: TypeScript
+### Upload and parse
+- Upload existing resumes in PDF, DOCX, or TXT format
+- Automatic parsing and resume population into the editor
+- On-device parsing with `pdf-parse` and `mammoth`
 
----
+### Export
+- A4 PDF export using `html2pdf.js`
+- Server-side PDF generation route for more stable production rendering
+- Print-safe layout with margin and typography consistency
 
-## ⚙️ Direct Setup & Deployment
+## Architecture overview
 
-### 1. Install Workspace
+- `pages/` contains the landing page, builder workspace, and API routes
+- `components/` stores editor, resume preview, and UI components
+- `lib/` includes reusable PDF export utilities
+- `store/` holds global resume and template state with Zustand
+- `data/` contains sample resume seed data
+- `types/` contains type declarations and library shims
+
+## Technology stack
+
+- Next.js 14
+- React 18
+- TypeScript
+- Tailwind CSS
+- Zustand
+- React Hook Form
+- Zod
+- Puppeteer
+- html2pdf.js
+- pdf-parse
+- mammoth
+
+## Getting started
+
 ```bash
 npm install
-```
-
-### 2. Launch Workstation Server
-```bash
 npm run dev
 ```
-Open [http://localhost:3000](http://localhost:3000) for real-time split-pane editing.
 
-### 3. Compile & Production Build
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Production build
+
 ```bash
 npm run build
 npm run start
 ```
 
----
+## Notes
 
-## 📂 Architecture Mapping
+- The project builds successfully with `npm run build`.
+- The API route `pages/api/resume/parse.ts` handles PDF/DOCX parsing.
+- The resume editor supports file upload, AI enhancement, and PDF export.
 
-```
-Resume JSON (Source of Truth)
-        │
-        ├── Zod Schema Validator
-        │
-        ├── Zustand Store (Reactive State)
-        │
-        ├── React Memo Components (Zero-Lag Render)
-        │
-        └── Dual-Pane UI Canvas
-            ├── Premium Accordion Form Stack
-            └── Figma-Style Zoom Workspace
-```
+## Recommended steps for next improvement
 
-**Built for developers, builders, and professionals who demand a top-tier resume.**
+- Add authentication and cloud save for multi-user accounts
+- Add template marketplace and resume versioning backend
+- Add analytics dashboards and recruiter share links
+- Add server-side AI orchestration for higher-quality content suggestions

@@ -97,8 +97,18 @@ export interface DetailedScore {
 
 type ListSectionKey = Exclude<keyof Resume['sections'], 'summary'>;
 
+export interface ResumeVersion {
+  id: string;
+  timestamp: string;
+  label: string;
+  resume: Resume;
+}
+
 interface ResumeStore {
   resume: Resume | null;
+  versions: ResumeVersion[];
+  activeWorkspace: string;
+  workspaces: Record<string, Resume>;
   setResume: (data: Resume) => void;
   updateBasics: (basics: Resume['basics']) => void;
   updateSection: (section: keyof Resume['sections'], data: any) => void;
@@ -108,12 +118,19 @@ interface ResumeStore {
   removeExperienceItem: (index: number) => void;
   getScore: () => number;
   getDetailedScore: () => DetailedScore;
+  saveVersion: (label: string) => void;
+  restoreVersion: (id: string) => void;
+  deleteVersion: (id: string) => void;
+  switchWorkspace: (workspaceId: string) => void;
 }
 
 export const useResumeStore = create<ResumeStore>()(
   persist(
     (set, get) => ({
       resume: null,
+      versions: [],
+      activeWorkspace: 'default',
+      workspaces: {},
 
       setResume: (data: Resume) => set({ resume: data }),
 
@@ -214,6 +231,50 @@ export const useResumeStore = create<ResumeStore>()(
                 },
               },
             },
+          };
+        }),
+
+      saveVersion: (label: string) =>
+        set((state) => {
+          if (!state.resume) return {};
+          const newVersion: ResumeVersion = {
+            id: Date.now().toString(),
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' ' + new Date().toLocaleDateString(),
+            label: label || `Snapshot ${state.versions.length + 1}`,
+            resume: JSON.parse(JSON.stringify(state.resume)),
+          };
+          return {
+            versions: [newVersion, ...state.versions],
+          };
+        }),
+
+      restoreVersion: (id: string) =>
+        set((state) => {
+          const version = state.versions.find((v) => v.id === id);
+          if (!version) return {};
+          return {
+            resume: JSON.parse(JSON.stringify(version.resume)),
+          };
+        }),
+
+      deleteVersion: (id: string) =>
+        set((state) => ({
+          versions: state.versions.filter((v) => v.id !== id),
+        })),
+
+      switchWorkspace: (workspaceId: string) =>
+        set((state) => {
+          if (!state.resume) return {};
+          const updatedWorkspaces = {
+            ...state.workspaces,
+            [state.activeWorkspace]: JSON.parse(JSON.stringify(state.resume)),
+          };
+          // load target resume or load blank sample
+          const targetResume = updatedWorkspaces[workspaceId] || state.resume;
+          return {
+            activeWorkspace: workspaceId,
+            workspaces: updatedWorkspaces,
+            resume: JSON.parse(JSON.stringify(targetResume)),
           };
         }),
 
@@ -577,7 +638,12 @@ export const useResumeStore = create<ResumeStore>()(
     {
       name: 'resume-storage', // name of the item in localStorage
       storage: createJSONStorage(() => localStorage), // use localStorage
-      partialize: (state) => ({ resume: state.resume }), // only store the 'resume' part of the state
+      partialize: (state) => ({
+        resume: state.resume,
+        versions: state.versions,
+        activeWorkspace: state.activeWorkspace,
+        workspaces: state.workspaces,
+      }),
     }
   )
 );

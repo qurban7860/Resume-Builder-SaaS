@@ -1,434 +1,425 @@
-import { useEffect, useState } from 'react';
-import { useResumeStore } from '@/store/useResumeStore';
-import { useTemplateStore } from '@/store/useTemplateStore';
-import { ResumeRenderer } from '@/components/resume/ResumeRenderer';
-import { ResumeEditor } from '@/components/editor/ResumeEditor';
-import resumeData from '@/data/resume.json';
-import { exportResumeToPDF } from '@/lib/pdfExport';
-import { AtsFeedbackWidget } from '@/components/resume/AtsFeedbackWidget';
-import { TemplatePicker } from '@/components/resume/TemplatePicker';
+import { useState } from 'react';
+import Link from 'next/link';
+import Head from 'next/head';
 
-export default function Dashboard() {
-  const { resume, setResume, getScore } = useResumeStore();
-  const { templateId } = useTemplateStore();
-  const [score, setScore] = useState(0);
-  const [loading, setLoading] = useState(true);
-  const [isExporting, setIsExporting] = useState(false);
-  const [zoom, setZoom] = useState(1.0);
-  const [mobileTab, setMobileTab] = useState<'editor' | 'preview'>('editor');
+export default function LandingPage() {
+  const [demoTitle, setDemoTitle] = useState('Senior Software Engineer');
+  const [demoCompany, setDemoCompany] = useState('Google');
+  const [demoBullets, setDemoBullets] = useState([
+    'Led development of high-throughput microservices using Next.js and Node.js.',
+    'Optimized SQL database query execution times by 42% through strategic indexing.'
+  ]);
 
-  useEffect(() => {
-    // Load initial resume data
-    if (!resume) {
-      setResume(resumeData as any);
-    }
-    setLoading(false);
-  }, [resume, setResume]);
-
-  useEffect(() => {
-    // Dynamic auto-scaling depending on the container width to fit canvas perfectly
-    const handleResize = () => {
-      if (typeof window !== 'undefined') {
-        const parent = document.getElementById('preview-workspace-parent');
-        if (parent) {
-          const parentWidth = parent.clientWidth - 48; // subtract padding (e.g. px-6 = 48px)
-          const a4WidthPx = 794; // 210mm in pixels at 96 DPI
-          let calculatedZoom = parentWidth / a4WidthPx;
-          // Clamp zoom level between 0.35 and 1.1 to avoid extreme sizes
-          calculatedZoom = Math.min(1.1, Math.max(0.35, calculatedZoom));
-          setZoom(calculatedZoom);
-        } else {
-          // Standard window width fallback
-          const width = window.innerWidth;
-          if (width < 480) {
-            setZoom(0.42);
-          } else if (width < 640) {
-            setZoom(0.5);
-          } else if (width < 1024) {
-            setZoom(0.75);
-          } else if (width < 1280) {
-            setZoom(0.85);
-          } else {
-            setZoom(1.0);
-          }
-        }
-      }
-    };
-    
-    if (!loading) {
-      handleResize();
-      const timer = setTimeout(handleResize, 100);
-      window.addEventListener('resize', handleResize);
-      return () => {
-        clearTimeout(timer);
-        window.removeEventListener('resize', handleResize);
-      };
-    }
-  }, [loading]);
-
-  useEffect(() => {
-    // Update score whenever resume changes
-    const newScore = getScore();
-    setScore(newScore);
-  }, [resume, getScore]);
-
-  const handleExportPDF = async () => {
-    if (isExporting) return;
-    try {
-      setIsExporting(true);
-      if (!resume) return;
-      const filename = `${resume.basics.name.replace(/\s+/g, '-')}-resume.pdf`;
-
-      const response = await fetch('/api/resume/pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ resume, filename, templateId }),
-      });
-
-      if (!response.ok) {
-        const errorBody = await response.json().catch(() => null);
-        throw new Error(errorBody?.error || 'PDF export failed');
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.warn('Server PDF export failed; falling back to client-side PDF export.', error);
-      try {
-        if (!resume) return;
-        await exportResumeToPDF(resume, `${resume.basics.name.replace(/\s+/g, '-')}-resume.pdf`, templateId);
-      } catch (fallbackError) {
-        console.error('Client-side PDF fallback failed:', fallbackError);
-        alert('Failed to export PDF. Please try again.');
-      }
-    } finally {
-      setIsExporting(false);
-    }
+  const handleBulletChange = (index: number, val: string) => {
+    const updated = [...demoBullets];
+    updated[index] = val;
+    setDemoBullets(updated);
   };
-
-  const loadSampleData = () => {
-    if (window.confirm('Are you sure you want to load the premium sample resume? This will overwrite your current draft.')) {
-      setResume(resumeData as any);
-    }
-  };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-slate-50">
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin" />
-          <p className="text-sm font-semibold text-slate-600">Loading Resume Workstation...</p>
-        </div>
-      </div>
-    );
-  }
-
-  // Get active template display name
-  const activeTemplateName = templateId.charAt(0).toUpperCase() + templateId.slice(1);
 
   return (
-    <div className="min-h-screen lg:h-screen lg:overflow-hidden flex flex-col bg-slate-50 font-sans antialiased text-slate-800">
-      
-      {/* ── Top Premium Glassmorphic Header ── */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30 px-4 py-3 sm:px-6 sm:py-4 flex justify-between items-center shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
-        <div className="flex items-center gap-2 sm:gap-3">
-          <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white font-black text-sm sm:text-base shadow-md shadow-indigo-150">
-            R
-          </div>
-          <div>
-            <h1 className="text-sm sm:text-md font-black tracking-tight bg-gradient-to-r from-indigo-600 via-purple-600 to-violet-700 bg-clip-text text-transparent">
-              ResumeBuilder Pro
-            </h1>
-            <p className="text-[8px] sm:text-[10px] text-slate-400 font-bold uppercase tracking-wider">Top 1% FAANG Standard Engine</p>
-          </div>
-        </div>
+    <div className="min-h-screen bg-[#070913] text-slate-100 overflow-x-hidden font-sans selection:bg-indigo-500 selection:text-white">
+      <Head>
+        <title>ResumeBuilder Pro | Premium AI-Powered ATS Resume Builder</title>
+        <meta name="description" content="Build a top 1% FAANG-standard, ATS-optimized resume using our elite AI engine. Compete with leading platforms like Resume.io and Novoresume with real-time scoring, recruiter scan heatmaps, and elite typography." />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
 
-        {/* Action Widgets */}
-        <div className="flex items-center gap-2 sm:gap-6">
-          {/* ATS Mini Badge */}
-          <div className="hidden md:flex items-center gap-2.5 bg-slate-50 border border-slate-200 px-3.5 py-1.5 rounded-full shadow-inner">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-xs font-semibold text-slate-500">ATS Score:</span>
-            <span className={`text-sm font-black ${
-              score >= 90 ? 'text-green-600' : score >= 75 ? 'text-indigo-600' : 'text-amber-500'
-            }`}>
-              {score}/100
-            </span>
-          </div>
-          {/* Mobile ATS Mini Badge - visible below md */}
-          <div className="md:hidden flex items-center gap-1.5 bg-slate-50 border border-slate-200 px-2.5 py-1 rounded-full shadow-inner">
-            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-            <span className="text-[10px] font-semibold text-slate-500">ATS:</span>
-            <span className={`text-xs font-black ${
-              score >= 90 ? 'text-green-600' : score >= 75 ? 'text-indigo-600' : 'text-amber-500'
-            }`}>
-              {score}
-              <span className="text-slate-400">/100</span>
-            </span>
-          </div>
+      {/* Radial Glow Effects */}
+      <div className="absolute top-0 left-1/4 w-[600px] h-[600px] bg-indigo-600/10 rounded-full blur-[160px] pointer-events-none" />
+      <div className="absolute top-1/3 right-1/4 w-[500px] h-[500px] bg-violet-600/10 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-10 left-1/3 w-[800px] h-[800px] bg-purple-600/5 rounded-full blur-[200px] pointer-events-none" />
 
-          <div className="flex items-center gap-2">
-            {/* Load Mock Data */}
-            <button
-              onClick={loadSampleData}
-              title="Reset to Premium Sample Data"
-              className="px-2.5 py-1.5 sm:px-3.5 sm:py-2 text-[10px] sm:text-xs font-bold text-slate-600 hover:text-slate-900 border border-slate-200 bg-white hover:bg-slate-50 active:scale-95 transition-all rounded-lg"
+      {/* ── Premium Glassmorphic Header ── */}
+      <header className="sticky top-0 z-50 w-full border-b border-slate-800/60 bg-[#070913]/70 backdrop-blur-md transition-all duration-300">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 text-white font-black text-lg shadow-[0_0_20px_rgba(99,102,241,0.3)] group-hover:scale-105 transition-transform duration-300">
+              R
+            </div>
+            <div>
+              <span className="text-md font-black tracking-tight bg-gradient-to-r from-white via-indigo-200 to-indigo-400 bg-clip-text text-transparent">
+                ResumeBuilder<span className="text-indigo-400">Pro</span>
+              </span>
+              <span className="block text-[8px] font-extrabold uppercase tracking-widest text-slate-500">AI Ecosystem</span>
+            </div>
+          </Link>
+
+          <nav className="hidden md:flex items-center gap-8 text-xs font-semibold uppercase tracking-wider text-slate-400">
+            <a href="#features" className="hover:text-white transition-colors duration-200">Features</a>
+            <a href="#templates" className="hover:text-white transition-colors duration-200">Templates</a>
+            <a href="#recruiter-sim" className="hover:text-white transition-colors duration-200">Recruiter Vision</a>
+            <a href="#pricing" className="hover:text-white transition-colors duration-200">Pricing</a>
+          </nav>
+
+          <div className="flex items-center gap-4">
+            <Link 
+              href="/builder" 
+              className="group relative inline-flex items-center justify-center overflow-hidden rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-2.5 text-xs font-bold uppercase tracking-wider text-white shadow-[0_4px_20px_rgba(99,102,241,0.25)] transition-all hover:from-indigo-500 hover:to-violet-500 active:scale-95 duration-200"
             >
-              <span className="sm:hidden">🔄</span>
-              <span className="hidden sm:inline">🔄 Load Sample</span>
-            </button>
-
-            {/* Export PDF */}
-            <button
-              onClick={handleExportPDF}
-              disabled={isExporting}
-              className={`
-                px-3 py-1.5 sm:px-5 sm:py-2 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700
-                text-white rounded-lg shadow-sm font-bold text-[10px] sm:text-xs uppercase tracking-wider active:scale-[0.97]
-                transition-all duration-200 flex items-center gap-1.5 sm:gap-2
-                ${isExporting ? 'opacity-75 cursor-not-allowed' : ''}
-              `}
-            >
-              {isExporting ? (
-                <>
-                  <div className="w-3 h-3 sm:w-3.5 sm:h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Building...</span>
-                </>
-              ) : (
-                <>
-                  <span>📥 Export PDF</span>
-                </>
-              )}
-            </button>
+              <span className="relative z-10 flex items-center gap-1.5">
+                Go to Workspace
+                <svg className="w-3.5 h-3.5 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </span>
+              <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-indigo-500 to-purple-500 group-hover:translate-x-0 transition-transform duration-300" />
+            </Link>
           </div>
         </div>
       </header>
- 
-      {/* ── Mobile Tab Switcher (visible only below lg) ── */}
-      <div className="lg:hidden flex items-center bg-white border-b border-slate-200 no-print" role="tablist" aria-label="Panel switcher">
-        <button
-          role="tab"
-          aria-selected={mobileTab === 'editor'}
-          onClick={() => setMobileTab('editor')}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs font-bold uppercase tracking-wider transition-all duration-200 relative ${
-            mobileTab === 'editor'
-              ? 'text-indigo-600 tab-active-underline'
-              : 'text-slate-500 hover:text-slate-700'
-          }`}
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-          </svg>
-          Editor
-          <span className={`text-[9px] px-1.5 py-0.5 rounded-full font-black ${
-            score >= 90 ? 'bg-green-100 text-green-700' : score >= 75 ? 'bg-indigo-100 text-indigo-700' : 'bg-amber-100 text-amber-700'
-          }`}>{score}</span>
-        </button>
-        <div className="w-px h-6 bg-slate-200" />
-        <button
-          role="tab"
-          aria-selected={mobileTab === 'preview'}
-          onClick={() => setMobileTab('preview')}
-          className={`flex-1 flex items-center justify-center gap-2 py-3 text-xs font-bold uppercase tracking-wider transition-all duration-200 relative ${
-            mobileTab === 'preview'
-              ? 'text-indigo-600 tab-active-underline'
-              : 'text-slate-500 hover:text-slate-700'
-          }`}
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-          </svg>
-          Preview
-        </button>
-      </div>
 
-      {/* ── Main Workspace Area (Independent Scrolls) ── */}
-      <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
-        
-        {/* Left Side: Dynamic Editor Column */}
-        <aside className={`w-full lg:w-[440px] xl:w-[460px] lg:h-full lg:overflow-y-auto lg:border-r border-slate-200 bg-white p-4 sm:p-6 flex-shrink-0 space-y-6 ${
-            mobileTab === 'editor' ? 'block' : 'hidden lg:block'
-          }`}>
+      {/* ── Hero Section ── */}
+      <section className="relative mx-auto max-w-7xl px-6 pt-16 pb-24 text-center">
+        <div className="inline-flex items-center gap-2 rounded-full border border-indigo-500/30 bg-indigo-500/5 px-4 py-1.5 mb-8 animate-fade-slide-in">
+          <span className="flex h-2 w-2 rounded-full bg-indigo-400 animate-pulse" />
+          <span className="text-[10px] font-black uppercase tracking-widest text-indigo-300">Powered by Gemini 1.5 & ATS Core Engine v2.0</span>
+        </div>
+
+        <h1 className="mx-auto max-w-4xl text-4xl font-extrabold tracking-tight text-white sm:text-6xl lg:text-[70px] sm:leading-[1.1] mb-6 animate-fade-slide-in">
+          Build a Resume That Lands <span className="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">FAANG Interviews</span>
+        </h1>
+
+        <p className="mx-auto max-w-2xl text-md sm:text-lg text-slate-400 leading-relaxed mb-10 animate-fade-in">
+          An elite AI-powered resume builder designed to outperform standard ATS filters and grab recruiters' attention in under 6 seconds. Trusted by engineers at Google, Meta, and Stripe.
+        </p>
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-20 animate-fade-in">
+          <Link
+            href="/builder"
+            className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl bg-indigo-600 px-8 py-4 text-sm font-bold uppercase tracking-wider text-white shadow-[0_10px_30px_rgba(99,102,241,0.3)] hover:bg-indigo-500 active:scale-95 transition-all duration-200"
+          >
+            Create Resume Now
+          </Link>
+          <a
+            href="#demo"
+            className="w-full sm:w-auto inline-flex items-center justify-center rounded-xl border border-slate-700 bg-slate-800/30 hover:bg-slate-800/70 hover:border-slate-600 px-8 py-4 text-sm font-bold uppercase tracking-wider text-slate-300 transition-all duration-200"
+          >
+            Watch Live Demo
+          </a>
+        </div>
+
+        {/* ── Interactive Live Sandbox Demo ── */}
+        <div id="demo" className="mx-auto max-w-5xl rounded-3xl border border-slate-800/80 bg-slate-950/40 p-5 sm:p-8 backdrop-blur-sm shadow-[0_30px_80px_rgba(0,0,0,0.4)] relative animate-fade-slide-in">
+          <div className="absolute top-0 right-1/4 w-[300px] h-[300px] bg-indigo-500/5 rounded-full blur-[80px] pointer-events-none" />
           
-          {/* Real-time ATS Dashboard gauge */}
-          <div className="bg-gradient-to-tr from-slate-900 via-indigo-950 to-indigo-900 rounded-2xl p-5 text-white shadow-lg relative overflow-hidden">
-            <div className="absolute -right-4 -bottom-6 w-24 h-24 bg-white/5 rounded-full blur-xl" />
-            <div className="absolute -left-6 -top-6 w-20 h-20 bg-indigo-500/10 rounded-full blur-lg" />
-            
-            <div className="flex justify-between items-start mb-3">
-              <div>
-                <span className="text-[9px] uppercase tracking-widest text-indigo-300 font-extrabold">Active Layout Style</span>
-                <h3 className="text-sm font-extrabold text-white mt-0.5">{activeTemplateName}</h3>
+          <div className="flex items-center gap-2 mb-6 border-b border-slate-900 pb-4">
+            <div className="w-3 h-3 rounded-full bg-rose-500/80" />
+            <div className="w-3 h-3 rounded-full bg-amber-500/80" />
+            <div className="w-3 h-3 rounded-full bg-emerald-500/80" />
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 ml-2">Interactive Preview Editor Sandbox</span>
+          </div>
+
+          <div className="grid gap-8 lg:grid-cols-5 text-left">
+            {/* Input Panel */}
+            <div className="lg:col-span-2 space-y-5 bg-slate-900/50 p-5 rounded-2xl border border-slate-800/50 flex flex-col justify-between">
+              <div className="space-y-4">
+                <h3 className="text-xs font-black uppercase tracking-wider text-indigo-400">Interactive Inputs</h3>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Job Title</label>
+                  <input
+                    type="text"
+                    value={demoTitle}
+                    onChange={(e) => setDemoTitle(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Company Name</label>
+                  <input
+                    type="text"
+                    value={demoCompany}
+                    onChange={(e) => setDemoCompany(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-lg px-3.5 py-2 text-xs text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">Impact Bullet points</label>
+                  <div className="space-y-2">
+                    {demoBullets.map((bullet, idx) => (
+                      <textarea
+                        key={idx}
+                        value={bullet}
+                        onChange={(e) => handleBulletChange(idx, e.target.value)}
+                        className="w-full min-h-[50px] bg-slate-950 border border-slate-800 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-indigo-500 transition-colors"
+                      />
+                    ))}
+                  </div>
+                </div>
               </div>
-              <div className="px-2 py-0.5 rounded-full bg-white/10 text-white font-bold text-[9px] uppercase tracking-wider backdrop-blur-sm">
-                ATS Engine v2.0
-              </div>
+              <Link 
+                href="/builder" 
+                className="mt-6 w-full py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-xl text-xs font-bold uppercase tracking-wider text-center shadow-lg active:scale-95 transition-all"
+              >
+                Open Full Workstation
+              </Link>
             </div>
 
-            <div className="flex items-center justify-between gap-4 mt-4 bg-white/5 border border-white/10 rounded-xl p-3">
-              <div>
-                <p className="text-[10px] text-indigo-200">Score Rating</p>
-                <p className="text-xs font-black text-white">
-                  {score >= 90 ? 'Elite (Top 1%)' : score >= 75 ? 'Strong Competitor' : 'Needs Work'}
-                </p>
-              </div>
-              <div className="text-right">
-                <span className="text-xl sm:text-2xl font-black">{score}</span>
-                <span className="text-[10px] text-white/50">/100</span>
+            {/* A4 Preview Mockup */}
+            <div className="lg:col-span-3 flex justify-center bg-slate-950/60 p-6 rounded-2xl border border-slate-800/50 relative overflow-hidden">
+              <div className="w-[100%] min-h-[380px] bg-white text-slate-900 p-6 rounded-lg shadow-2xl relative select-none scale-[0.98] transition-transform duration-200">
+                {/* Header Mock */}
+                <div className="text-center border-b pb-3 mb-3">
+                  <h4 className="text-base font-extrabold text-slate-900 leading-tight">Qurban Hanif</h4>
+                  <p className="text-[9px] uppercase tracking-wider text-slate-500 font-bold mt-0.5">{demoTitle}</p>
+                  <p className="text-[8px] text-slate-400 mt-1">qurbanhanif120@gmail.com | 03085651015 | Lahore</p>
+                </div>
+                
+                {/* Experience section mock */}
+                <div>
+                  <h5 className="text-[10px] font-black uppercase border-b border-slate-900 pb-0.5 mb-2 tracking-wide text-slate-900">Experience</h5>
+                  <div className="mb-2">
+                    <div className="flex justify-between items-baseline text-[9px] font-bold">
+                      <span>{demoTitle} at <span className="text-indigo-600">{demoCompany}</span></span>
+                      <span className="text-slate-500 text-[8px]">07/2025 - Present</span>
+                    </div>
+                    <ul className="list-disc pl-3 mt-1 space-y-1">
+                      {demoBullets.map((bullet, idx) => (
+                        <li key={idx} className="text-[8px] text-slate-600 leading-normal">{bullet}</li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+
+                {/* Score Widget Overlay */}
+                <div className="absolute right-4 bottom-4 bg-[#070913] border border-slate-800 text-white px-3.5 py-2 rounded-xl flex items-center gap-2 shadow-xl animate-float">
+                  <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                  <div>
+                    <p className="text-[7px] text-slate-400 font-bold uppercase tracking-wider">ATS Score Check</p>
+                    <p className="text-xs font-black text-indigo-400">92/100 (Strong)</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Core Accordion Editor */}
-          <ResumeEditor />
+      {/* ── Features Grid ── */}
+      <section id="features" className="bg-[#0b0e1e] border-y border-slate-800/50 py-24">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl mb-4">
+              Advanced Technology to Outperform Competitors
+            </h2>
+            <p className="mx-auto max-w-2xl text-slate-400 text-sm">
+              We provide the tools used by successful candidates to break through strict applicant tracking filters and secure high-paying roles.
+            </p>
+          </div>
 
-          {/* Premium FAANG Layout Picker */}
-          <TemplatePicker />
+          <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                title: 'ATS Scoring Engine',
+                desc: 'Real-time scoring mapping details of your experience, skills, projects, and format against standard applicant tracking criteria.',
+                icon: '📊'
+              },
+              {
+                title: 'Recruiter Scan Simulator',
+                desc: 'Visual eye-tracking simulated heatmap overlays displaying exactly where recruiters look first during quick 6-second scans.',
+                icon: '👁️'
+              },
+              {
+                title: 'Gemini AI Assistant',
+                desc: 'Optimize experience bullets on-the-fly. Translates technical duties into metrics-driven achievements using the STAR methodology.',
+                icon: '⚡'
+              },
+              {
+                title: 'FAANG-Approved Layouts',
+                desc: 'Clean, print-perfect templates styled on formats proven to work at top technology companies and enterprise firms.',
+                icon: '🏛️'
+              },
+              {
+                title: 'Secure Local Storage',
+                desc: 'Your data is 100% yours, stored locally in your browser. Edit in confidence without third-party tracking.',
+                icon: '🔒'
+              },
+              {
+                title: 'Elite PDF Compiler',
+                desc: 'A robust dual-channel (client-side and Puppeteer serverless API) renderer that compiles A4-dimension PDF files flawlessly.',
+                icon: '📄'
+              }
+            ].map((feat, idx) => (
+              <div 
+                key={idx} 
+                className="bg-slate-950/40 p-6 rounded-2xl border border-slate-800/80 hover:border-indigo-500/50 hover:shadow-[0_4px_30px_rgba(99,102,241,0.05)] transition-all duration-300 group"
+              >
+                <div className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center text-lg mb-4 group-hover:scale-110 transition-transform">
+                  {feat.icon}
+                </div>
+                <h3 className="text-md font-bold text-white mb-2">{feat.title}</h3>
+                <p className="text-xs text-slate-400 leading-relaxed">{feat.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
 
-          {/* Structural Completeness Meter */}
-          <div className="rounded-xl border border-slate-200 bg-white p-4 sm:p-5 shadow-sm">
-            <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider mb-4 flex items-center gap-1.5">
-              <span>📋 Document Completeness</span>
-            </h3>
-            <div className="space-y-3.5">
+      {/* ── Interactive Recruiter Scan Simulation Showcase ── */}
+      <section id="recruiter-sim" className="py-24 max-w-7xl mx-auto px-6">
+        <div className="grid gap-12 lg:grid-cols-2 items-center">
+          <div className="space-y-6 text-left">
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-500/10 border border-purple-500/20 text-purple-300 rounded-full text-[10px] font-bold uppercase tracking-wider">
+              <span>Recruiter Eyes Simulation</span>
+            </div>
+            <h2 className="text-3xl font-black tracking-tight text-white sm:text-4xl">
+              Optimize for the 6-Second Glance
+            </h2>
+            <p className="text-slate-400 text-sm leading-relaxed">
+              Recruiters spend an average of 6 seconds scan-reading resumes before making an initial shortlist decision. Our built-in **Heatmap Scan Simulator** simulates eye fixation.
+            </p>
+            <div className="space-y-4">
               {[
-                { name: 'Professional Experience', count: resume?.sections.experience.items.length || 0, icon: '💼' },
-                { name: 'Core Skill Categories', count: resume?.sections.skills.items.length || 0, icon: '⚡' },
-                { name: 'Key Engineering Projects', count: resume?.sections.projects.items.length || 0, icon: '🚀' },
-                { name: 'Educational Institutions', count: resume?.sections.education.items.length || 0, icon: '🎓' },
-                { name: 'Industry Certifications', count: resume?.sections.certifications.items.length || 0, icon: '📜' },
-              ].map((sect, i) => (
-                <div key={i} className="flex items-center justify-between text-[11px] sm:text-xs">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs sm:text-sm">{sect.icon}</span>
-                    <span className="font-semibold text-slate-600">{sect.name}</span>
+                { label: 'Name & Headline Focus', desc: 'Ensures immediate brand recognition with premium alignment.' },
+                { label: 'Chronological Work Hierarchy', desc: 'Simulates tracking eye paths from latest to earliest accomplishments.' },
+                { label: 'Key Tech Verbs', desc: 'Highlights words like "Architected" or "Led" to ensure they fall along the reading path.' }
+              ].map((item, idx) => (
+                <div key={idx} className="flex gap-3">
+                  <div className="w-5 h-5 rounded-full bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center text-[10px] font-black text-indigo-400 mt-0.5">{idx + 1}</div>
+                  <div>
+                    <h4 className="text-xs font-bold text-white">{item.label}</h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">{item.desc}</p>
                   </div>
-                  <span className={`px-2 py-0.5 rounded-full font-bold ${
-                    sect.count > 0 ? 'bg-indigo-50 text-indigo-600' : 'bg-slate-100 text-slate-400'
-                  }`}>
-                    {sect.count} active
-                  </span>
                 </div>
               ))}
             </div>
-          </div>
-        </aside>
-
-        {/* Right Side: Lock-A4 Preview Workspace Canvas */}
-        <main 
-          id="preview-workspace-parent"
-          style={{
-            backgroundImage: 'radial-gradient(#cbd5e1 1.2px, transparent 1.2px)',
-            backgroundSize: '16px 16px',
-          }}
-          className={`flex-1 lg:h-full lg:overflow-y-auto bg-slate-50 py-6 px-4 flex flex-col items-center gap-6 relative transition-all duration-300 ${
-            mobileTab === 'preview' ? 'flex' : 'hidden lg:flex'
-          }`}
-        >
-          
-          {/* Dynamic Scroll Indicator / Top Utility Bar */}
-          <div className="w-full max-w-[210mm] flex flex-col sm:flex-row items-center justify-between gap-3 bg-white/80 backdrop-blur border border-slate-200/50 rounded-xl p-3.5 shadow-sm">
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-500 font-medium">A4 Dimension:</span>
-              <span className="text-[10px] px-2 py-0.5 bg-indigo-50 border border-indigo-100 rounded-md font-bold text-indigo-600 uppercase">
-                210mm × 297mm
-              </span>
-            </div>
-
-            {/* Premium Dynamic Zoom Widget */}
-            <div className="flex items-center gap-1.5 bg-slate-100/80 border border-slate-200/50 px-2 py-1 rounded-lg">
-              <button 
-                onClick={() => setZoom(z => Math.max(0.35, z - 0.05))} 
-                className="w-6 h-6 flex items-center justify-center text-xs font-black text-slate-500 hover:text-slate-900 border border-slate-200 bg-white active:scale-90 transition-all rounded shadow-sm"
-                title="Zoom Out"
-              >
-                -
-              </button>
-              <span className="text-xs font-mono font-bold text-slate-600 px-1 min-w-[36px] text-center">
-                {Math.round(zoom * 100)}%
-              </span>
-              <button 
-                onClick={() => setZoom(z => Math.min(1.2, z + 0.05))} 
-                className="w-6 h-6 flex items-center justify-center text-xs font-black text-slate-500 hover:text-slate-900 border border-slate-200 bg-white active:scale-90 transition-all rounded shadow-sm"
-                title="Zoom In"
-              >
-                +
-              </button>
-              <div className="w-px h-4 bg-slate-200 mx-1" />
-              <button 
-                onClick={() => {
-                  const parent = document.getElementById('preview-workspace-parent');
-                  if (parent) {
-                    const parentWidth = parent.clientWidth - 48;
-                    const a4WidthPx = 794;
-                    let calculatedZoom = parentWidth / a4WidthPx;
-                    calculatedZoom = Math.min(1.1, Math.max(0.35, calculatedZoom));
-                    setZoom(calculatedZoom);
-                  }
-                }}
-                className="px-2 py-0.5 text-[10px] font-bold text-indigo-600 hover:text-indigo-700 bg-indigo-50 hover:bg-indigo-100/80 active:scale-95 transition-all rounded"
-                title="Auto Fit to Screen"
-              >
-                Fit
-              </button>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="text-xs text-slate-400">Current Theme:</span>
-              <span className="text-xs font-bold text-slate-700 bg-white px-2.5 py-0.5 rounded-full border border-slate-200">
-                {templateId === 'classic' ? 'Georgia Monochrome' : templateId === 'modern' ? 'Indigo Sans' : 'Executive Royal Plum'}
-              </span>
-            </div>
-          </div>
-
-          {/* Centered Premium Shadow-A4 Preview Box */}
-          <div className="w-full flex justify-center items-start overflow-visible py-2" style={{ minHeight: `calc(297mm * ${zoom})` }}>
-            <div 
-              style={{ 
-                width: `calc(210mm * ${zoom})`,
-                height: `calc(297mm * ${zoom})`,
-                position: 'relative',
-                overflow: 'visible'
-              }}
-              className="flex-shrink-0 select-none"
+            <Link 
+              href="/builder" 
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold uppercase tracking-wider shadow-md transition-all active:scale-95"
             >
-              <div 
-                style={{ 
-                  transform: `scale(${zoom})`, 
-                  transformOrigin: 'top left',
-                  width: '210mm',
-                  height: '297mm',
-                  position: 'absolute',
-                  top: 0,
-                  left: 0,
-                  transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                }}
-                className="bg-white shadow-[0_25px_60px_rgba(15,23,42,0.12)] border border-slate-200/60 rounded-2xl overflow-hidden"
-              >
-                <div id="resume-preview" className="w-full">
-                  <ResumeRenderer resume={resume} printMode={true} />
-                </div>
+              Test Your Heatmap
+            </Link>
+          </div>
+
+          <div className="bg-slate-950/40 border border-slate-800/80 rounded-3xl p-6 relative overflow-hidden flex items-center justify-center">
+            {/* Background elements */}
+            <div className="absolute top-1/4 left-1/4 w-[200px] h-[200px] bg-purple-500/10 rounded-full blur-[60px]" />
+            
+            {/* Visual Heatmap Representation */}
+            <div className="w-full max-w-[340px] bg-white rounded-xl p-5 shadow-2xl relative select-none">
+              {/* Blur Heatmap circles */}
+              <div className="absolute top-8 left-1/2 -translate-x-1/2 w-14 h-14 bg-red-500/30 rounded-full blur-md" />
+              <div className="absolute top-20 left-12 w-10 h-10 bg-orange-500/30 rounded-full blur-md" />
+              <div className="absolute top-28 left-20 w-8 h-8 bg-yellow-500/25 rounded-full blur-sm" />
+              <div className="absolute top-[160px] left-12 w-12 h-12 bg-red-500/30 rounded-full blur-md" />
+              <div className="absolute top-[220px] left-12 w-8 h-8 bg-orange-500/20 rounded-full blur-sm" />
+
+              <div className="text-center border-b pb-2 mb-3">
+                <div className="h-3 w-20 bg-slate-900 rounded mx-auto mb-1" />
+                <div className="h-2 w-28 bg-slate-400 rounded mx-auto" />
+              </div>
+              <div className="space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="space-y-1.5">
+                    <div className="flex justify-between">
+                      <div className="h-2.5 w-32 bg-slate-700 rounded" />
+                      <div className="h-2 w-12 bg-slate-300 rounded" />
+                    </div>
+                    <div className="h-2 w-full bg-slate-200 rounded" />
+                    <div className="h-2 w-5/6 bg-slate-200 rounded" />
+                  </div>
+                ))}
               </div>
             </div>
           </div>
+        </div>
+      </section>
 
-          {/* Interactive ATS Feedback Widget docked under the sheet */}
-          <div className="w-full max-w-[210mm]">
-            <div className="bg-slate-800 text-white rounded-xl px-4 py-2 text-xs font-bold shadow-md inline-flex items-center gap-1.5 mb-3.5">
-              <span>💡 ATS Core Feedback & Optimizations</span>
-            </div>
-            <AtsFeedbackWidget />
+      {/* ── Pricing Matrix ── */}
+      <section id="pricing" className="bg-[#0b0e1e] border-t border-slate-800/50 py-24">
+        <div className="mx-auto max-w-7xl px-6 text-center">
+          <h2 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl mb-4">
+            Simple, Transparent SaaS Pricing
+          </h2>
+          <p className="mx-auto max-w-2xl text-slate-400 text-sm mb-16">
+            Get started for free or upgrade to Pro to unlock advanced AI modules and multi-version snapshots.
+          </p>
+
+          <div className="grid gap-8 max-w-4xl mx-auto md:grid-cols-3">
+            {[
+              {
+                title: 'Free Core',
+                price: '$0',
+                period: 'forever',
+                features: ['Standard Resume Editor', 'Classic Template Style', 'Basic ATS Scoring', 'Local Web Storage', 'Client PDF Download'],
+                btn: 'Start Free',
+                border: 'border-slate-800',
+                popular: false
+              },
+              {
+                title: 'Pro AI',
+                price: '$9',
+                period: 'month',
+                features: ['Gemini AI Enhancer', 'All 7 Premium Templates', 'Interactive Recruiter Heatmap', 'Version snapshots', 'Puppeteer PDF Render'],
+                btn: 'Upgrade to Pro',
+                border: 'border-indigo-500/80 shadow-[0_0_30px_rgba(99,102,241,0.15)] ring-1 ring-indigo-500/20',
+                popular: true
+              },
+              {
+                title: 'Enterprise',
+                price: '$29',
+                period: 'month',
+                features: ['All Pro features included', 'Shared workspace manager', 'Unlimited revisions', 'Custom fonts support', 'Priority API queues'],
+                btn: 'Deploy Enterprise',
+                border: 'border-slate-800',
+                popular: false
+              }
+            ].map((plan, idx) => (
+              <div 
+                key={idx} 
+                className={`bg-slate-950/70 p-6 rounded-2xl border ${plan.border} flex flex-col justify-between text-left relative`}
+              >
+                {plan.popular && (
+                  <span className="absolute -top-3.5 left-1/2 -translate-x-1/2 bg-indigo-600 text-white font-extrabold text-[9px] uppercase tracking-widest px-3 py-1 rounded-full shadow-md">
+                    Most Popular
+                  </span>
+                )}
+                <div>
+                  <h3 className="text-sm font-black uppercase tracking-wider text-slate-400 mb-2">{plan.title}</h3>
+                  <div className="flex items-baseline gap-1 mb-6">
+                    <span className="text-3xl font-black text-white">{plan.price}</span>
+                    <span className="text-xs text-slate-500 font-medium">/{plan.period}</span>
+                  </div>
+                  <ul className="space-y-3.5 mb-8 text-[11px] text-slate-300 font-medium">
+                    {plan.features.map((feat, i) => (
+                      <li key={i} className="flex items-center gap-2">
+                        <svg className="w-3.5 h-3.5 text-indigo-400 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                        </svg>
+                        {feat}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                <Link
+                  href="/builder"
+                  className={`w-full py-3 rounded-xl text-xs font-bold uppercase tracking-wider text-center active:scale-95 transition-all ${
+                    plan.popular
+                      ? 'bg-gradient-to-r from-indigo-600 to-violet-600 text-white shadow-lg shadow-indigo-500/20 hover:from-indigo-500 hover:to-violet-500'
+                      : 'border border-slate-700 bg-slate-800/30 text-slate-300 hover:bg-slate-800/60'
+                  }`}
+                >
+                  {plan.btn}
+                </Link>
+              </div>
+            ))}
           </div>
-        </main>
-      </div>
+        </div>
+      </section>
+
+      {/* ── Footer ── */}
+      <footer className="border-t border-slate-900 bg-[#05060b] py-12 text-slate-500 text-xs font-medium text-center">
+        <div className="mx-auto max-w-7xl px-6 flex flex-col md:flex-row justify-between items-center gap-4">
+          <div className="flex items-center gap-2.5">
+            <div className="w-6 h-6 rounded-lg bg-indigo-600/90 text-white flex items-center justify-center font-black text-xs">R</div>
+            <p>© 2026 ResumeBuilder Pro Inc. All rights reserved.</p>
+          </div>
+          <div className="flex items-center gap-6">
+            <a href="#" className="hover:text-slate-300 transition-colors">Privacy Policy</a>
+            <a href="#" className="hover:text-slate-300 transition-colors">Terms of Service</a>
+            <a href="/builder" className="text-indigo-400 hover:text-indigo-300 transition-colors">App Workspace</a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

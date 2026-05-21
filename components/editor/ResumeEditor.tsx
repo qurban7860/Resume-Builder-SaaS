@@ -1,6 +1,18 @@
 import { useState } from 'react';
 import { useResumeStore } from '@/store/useResumeStore';
 
+// ─── AI enhance helper ───────────────────────────────────────────────
+async function callAiEnhance(type: 'bullet' | 'summary' | 'keywords', text: string, jobTitle?: string): Promise<string> {
+  const res = await fetch('/api/ai/enhance', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ type, text, jobTitle }),
+  });
+  if (!res.ok) throw new Error('AI request failed');
+  const json = await res.json();
+  return json.enhanced || text;
+}
+
 export const ResumeEditor = () => {
   const resume = useResumeStore((state) => state.resume);
   const setResume = useResumeStore((state) => state.setResume);
@@ -8,6 +20,38 @@ export const ResumeEditor = () => {
   const moveSectionItem = useResumeStore((state) => state.moveSectionItem);
 
   const [expandedSection, setExpandedSection] = useState<string | null>('basics');
+  const [draggedItem, setDraggedItem] = useState<{ section: string; index: number } | null>(null);
+  const [dragOverIndex, setDragOverIndex] = useState<{ section: string; index: number } | null>(null);
+
+  // AI state
+  const [aiLoading, setAiLoading] = useState<string | null>(null); // key: 'summary' | 'exp-{n}'
+  const [aiDiff, setAiDiff] = useState<{ key: string; original: string; enhanced: string } | null>(null);
+
+  const handleDragStart = (e: React.DragEvent, section: string, index: number) => {
+    setDraggedItem({ section, index });
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent, section: string, index: number) => {
+    e.preventDefault();
+    if (draggedItem?.section === section && draggedItem?.index !== index) {
+      setDragOverIndex({ section, index });
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent, section: string, index: number) => {
+    e.preventDefault();
+    if (draggedItem && draggedItem.section === section && draggedItem.index !== index) {
+      moveSectionItem(section as any, draggedItem.index, index);
+    }
+    setDraggedItem(null);
+    setDragOverIndex(null);
+  };
+
+  const handleDragEnd = () => {
+    setDraggedItem(null);
+    setDragOverIndex(null);
+  };
 
   if (!resume) return null;
 
@@ -460,14 +504,52 @@ export const ResumeEditor = () => {
                 <div>
                   <div className="flex justify-between items-center mb-1.5">
                     <label className={premiumLabelClass}>Summary (Bio)</label>
-                    <span
-                      className={`text-[10px] font-bold ${
-                        summaryLen > 400 || summaryLen < 100 ? 'text-amber-500' : 'text-green-500'
-                      }`}
-                    >
-                      {summaryLen}/400 chars
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`text-[10px] font-bold ${
+                          summaryLen > 400 || summaryLen < 100 ? 'text-amber-500' : 'text-green-500'
+                        }`}
+                      >
+                        {summaryLen}/400 chars
+                      </span>
+                      <button
+                        type="button"
+                        disabled={aiLoading === 'summary'}
+                        onClick={async () => {
+                          try {
+                            setAiLoading('summary');
+                            const enhanced = await callAiEnhance('summary', resume.sections.summary.content, resume.basics.headline);
+                            setAiDiff({ key: 'summary', original: resume.sections.summary.content, enhanced });
+                          } catch { setAiLoading(null); }
+                          finally { setAiLoading(null); }
+                        }}
+                        className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-violet-50 text-violet-700 border border-violet-200 hover:bg-violet-100 text-[10px] font-bold transition-all active:scale-95 disabled:opacity-50"
+                        title="AI-powered summary generator"
+                      >
+                        {aiLoading === 'summary' ? (
+                          <span className="w-2.5 h-2.5 border border-violet-500 border-t-transparent rounded-full animate-spin" />
+                        ) : '✨'}
+                        AI Write
+                      </button>
+                    </div>
                   </div>
+                  {/* AI Diff Preview for Summary */}
+                  {aiDiff?.key === 'summary' && (
+                    <div className="mb-2 rounded-lg border border-violet-200 bg-violet-50 p-3 text-xs">
+                      <p className="text-violet-700 font-bold mb-1">✨ AI Suggestion:</p>
+                      <p className="text-slate-700 leading-relaxed">{aiDiff.enhanced}</p>
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          onClick={() => { handleSummaryChange(aiDiff.enhanced); setAiDiff(null); }}
+                          className="px-2.5 py-1 bg-violet-600 text-white rounded-md font-bold text-[10px] hover:bg-violet-700 transition-all"
+                        >Apply</button>
+                        <button
+                          onClick={() => setAiDiff(null)}
+                          className="px-2.5 py-1 bg-white text-slate-500 border border-slate-200 rounded-md font-bold text-[10px] hover:bg-slate-50 transition-all"
+                        >Dismiss</button>
+                      </div>
+                    </div>
+                  )}
                   <textarea
                     className="w-full min-h-[120px] rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 transition-all duration-200 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:shadow-sm"
                     placeholder="Draft your professional summary..."
@@ -527,9 +609,35 @@ export const ResumeEditor = () => {
             ) : (
               <div className="space-y-6">
                 {resume.sections.experience.items.map((item: any, index: number) => (
-                  <div key={item.id} className="rounded-xl border border-slate-100 bg-slate-50/45 p-4 hover:border-slate-200 transition-all duration-200">
+                  <div
+                    key={item.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, 'experience', index)}
+                    onDragOver={(e) => handleDragOver(e, 'experience', index)}
+                    onDrop={(e) => handleDrop(e, 'experience', index)}
+                    onDragEnd={handleDragEnd}
+                    className={`rounded-xl border p-4 transition-all duration-200 ${
+                      draggedItem?.section === 'experience' && draggedItem?.index === index
+                        ? 'opacity-40 border-dashed border-indigo-400 bg-slate-100 scale-95'
+                        : 'border-slate-100 bg-slate-50/45 hover:border-slate-200'
+                    } ${
+                      dragOverIndex?.section === 'experience' && dragOverIndex?.index === index
+                        ? 'border-indigo-400 shadow-md ring-2 ring-indigo-100 scale-[1.01] bg-indigo-50/30'
+                        : ''
+                    }`}
+                  >
                     <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3 mb-4">
-                      <p className="font-bold text-xs text-slate-700 uppercase tracking-wider">Experience #{index + 1}</p>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-slate-700 cursor-grab active:cursor-grabbing transition-colors"
+                          title="Drag to Reorder"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" />
+                          </svg>
+                        </div>
+                        <p className="font-bold text-xs text-slate-700 uppercase tracking-wider">Experience #{index + 1}</p>
+                      </div>
                       <div className="flex items-center gap-1.5">
                         <button
                           type="button"
@@ -626,7 +734,52 @@ export const ResumeEditor = () => {
                         </div>
                       </div>
                       <div>
-                        <label className={premiumLabelClass}>Summary (Accomplishments HTML)</label>
+                        <div className="flex justify-between items-center mb-1.5">
+                          <label className={premiumLabelClass}>Summary (Accomplishments HTML)</label>
+                          <button
+                            type="button"
+                            disabled={aiLoading === `exp-${index}`}
+                            onClick={async () => {
+                              const rawText = (item.summary || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+                              if (!rawText) return;
+                              try {
+                                setAiLoading(`exp-${index}`);
+                                const enhanced = await callAiEnhance('bullet', rawText, item.title);
+                                setAiDiff({ key: `exp-${index}`, original: item.summary, enhanced });
+                              } catch { setAiLoading(null); }
+                              finally { setAiLoading(null); }
+                            }}
+                            className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-violet-50 text-violet-700 border border-violet-200 hover:bg-violet-100 text-[10px] font-bold transition-all active:scale-95 disabled:opacity-50"
+                            title="AI bullet point improver"
+                          >
+                            {aiLoading === `exp-${index}` ? (
+                              <span className="w-2.5 h-2.5 border border-violet-500 border-t-transparent rounded-full animate-spin" />
+                            ) : '✨'}
+                            AI Improve
+                          </button>
+                        </div>
+                        {/* AI Diff Preview for Experience bullet */}
+                        {aiDiff?.key === `exp-${index}` && (
+                          <div className="mb-2 rounded-lg border border-violet-200 bg-violet-50 p-3 text-xs">
+                            <p className="text-violet-700 font-bold mb-1">✨ AI Improved Bullet:</p>
+                            <p className="text-slate-700 leading-relaxed">{aiDiff.enhanced}</p>
+                            <div className="flex gap-2 mt-2">
+                              <button
+                                onClick={() => {
+                                  // Wrap in li if not already HTML
+                                  const html = aiDiff.enhanced.startsWith('<') ? aiDiff.enhanced : `<ul><li>${aiDiff.enhanced}</li></ul>`;
+                                  handleExperienceChange(index, 'summary', html);
+                                  setAiDiff(null);
+                                }}
+                                className="px-2.5 py-1 bg-violet-600 text-white rounded-md font-bold text-[10px] hover:bg-violet-700 transition-all"
+                              >Apply</button>
+                              <button
+                                onClick={() => setAiDiff(null)}
+                                className="px-2.5 py-1 bg-white text-slate-500 border border-slate-200 rounded-md font-bold text-[10px] hover:bg-slate-50 transition-all"
+                              >Dismiss</button>
+                            </div>
+                          </div>
+                        )}
                         <textarea
                           className="w-full min-h-[100px] rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-800 transition-all duration-200 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:shadow-sm font-mono text-xs"
                           value={item.summary}
@@ -684,9 +837,35 @@ export const ResumeEditor = () => {
             ) : (
               <div className="space-y-4">
                 {resume.sections.skills.items.map((item: any, index: number) => (
-                  <div key={item.id} className="rounded-xl border border-slate-100 bg-slate-50/45 p-4 hover:border-slate-200 transition-all duration-200">
+                  <div
+                    key={item.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, 'skills', index)}
+                    onDragOver={(e) => handleDragOver(e, 'skills', index)}
+                    onDrop={(e) => handleDrop(e, 'skills', index)}
+                    onDragEnd={handleDragEnd}
+                    className={`rounded-xl border p-4 transition-all duration-200 ${
+                      draggedItem?.section === 'skills' && draggedItem?.index === index
+                        ? 'opacity-40 border-dashed border-indigo-400 bg-slate-100 scale-95'
+                        : 'border-slate-100 bg-slate-50/45 hover:border-slate-200'
+                    } ${
+                      dragOverIndex?.section === 'skills' && dragOverIndex?.index === index
+                        ? 'border-indigo-400 shadow-md ring-2 ring-indigo-100 scale-[1.01] bg-indigo-50/30'
+                        : ''
+                    }`}
+                  >
                     <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3 mb-4">
-                      <p className="font-bold text-xs text-slate-700 uppercase tracking-wider">Group #{index + 1}</p>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-slate-700 cursor-grab active:cursor-grabbing transition-colors"
+                          title="Drag to Reorder"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" />
+                          </svg>
+                        </div>
+                        <p className="font-bold text-xs text-slate-700 uppercase tracking-wider">Group #{index + 1}</p>
+                      </div>
                       <div className="flex items-center gap-1.5">
                         <button
                           type="button"
@@ -788,9 +967,35 @@ export const ResumeEditor = () => {
             ) : (
               <div className="space-y-6">
                 {resume.sections.projects.items.map((item: any, index: number) => (
-                  <div key={item.id} className="rounded-xl border border-slate-100 bg-slate-50/45 p-4 hover:border-slate-200 transition-all duration-200">
+                  <div
+                    key={item.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, 'projects', index)}
+                    onDragOver={(e) => handleDragOver(e, 'projects', index)}
+                    onDrop={(e) => handleDrop(e, 'projects', index)}
+                    onDragEnd={handleDragEnd}
+                    className={`rounded-xl border p-4 transition-all duration-200 ${
+                      draggedItem?.section === 'projects' && draggedItem?.index === index
+                        ? 'opacity-40 border-dashed border-indigo-400 bg-slate-100 scale-95'
+                        : 'border-slate-100 bg-slate-50/45 hover:border-slate-200'
+                    } ${
+                      dragOverIndex?.section === 'projects' && dragOverIndex?.index === index
+                        ? 'border-indigo-400 shadow-md ring-2 ring-indigo-100 scale-[1.01] bg-indigo-50/30'
+                        : ''
+                    }`}
+                  >
                     <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3 mb-4">
-                      <p className="font-bold text-xs text-slate-700 uppercase tracking-wider">Project #{index + 1}</p>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-slate-700 cursor-grab active:cursor-grabbing transition-colors"
+                          title="Drag to Reorder"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" />
+                          </svg>
+                        </div>
+                        <p className="font-bold text-xs text-slate-700 uppercase tracking-wider">Project #{index + 1}</p>
+                      </div>
                       <div className="flex items-center gap-1.5">
                         <button
                           type="button"
@@ -940,9 +1145,35 @@ export const ResumeEditor = () => {
             ) : (
               <div className="space-y-6">
                 {resume.sections.education.items.map((item: any, index: number) => (
-                  <div key={item.id} className="rounded-xl border border-slate-100 bg-slate-50/45 p-4 hover:border-slate-200 transition-all duration-200">
+                  <div
+                    key={item.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, 'education', index)}
+                    onDragOver={(e) => handleDragOver(e, 'education', index)}
+                    onDrop={(e) => handleDrop(e, 'education', index)}
+                    onDragEnd={handleDragEnd}
+                    className={`rounded-xl border p-4 transition-all duration-200 ${
+                      draggedItem?.section === 'education' && draggedItem?.index === index
+                        ? 'opacity-40 border-dashed border-indigo-400 bg-slate-100 scale-95'
+                        : 'border-slate-100 bg-slate-50/45 hover:border-slate-200'
+                    } ${
+                      dragOverIndex?.section === 'education' && dragOverIndex?.index === index
+                        ? 'border-indigo-400 shadow-md ring-2 ring-indigo-100 scale-[1.01] bg-indigo-50/30'
+                        : ''
+                    }`}
+                  >
                     <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3 mb-4">
-                      <p className="font-bold text-xs text-slate-700 uppercase tracking-wider">Education #{index + 1}</p>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-slate-700 cursor-grab active:cursor-grabbing transition-colors"
+                          title="Drag to Reorder"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" />
+                          </svg>
+                        </div>
+                        <p className="font-bold text-xs text-slate-700 uppercase tracking-wider">Education #{index + 1}</p>
+                      </div>
                       <div className="flex items-center gap-1.5">
                         <button
                           type="button"
@@ -1083,9 +1314,35 @@ export const ResumeEditor = () => {
             ) : (
               <div className="space-y-4">
                 {resume.sections.certifications.items.map((item: any, index: number) => (
-                  <div key={item.id} className="rounded-xl border border-slate-100 bg-slate-50/45 p-4 hover:border-slate-200 transition-all duration-200">
+                  <div
+                    key={item.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, 'certifications', index)}
+                    onDragOver={(e) => handleDragOver(e, 'certifications', index)}
+                    onDrop={(e) => handleDrop(e, 'certifications', index)}
+                    onDragEnd={handleDragEnd}
+                    className={`rounded-xl border p-4 transition-all duration-200 ${
+                      draggedItem?.section === 'certifications' && draggedItem?.index === index
+                        ? 'opacity-40 border-dashed border-indigo-400 bg-slate-100 scale-95'
+                        : 'border-slate-100 bg-slate-50/45 hover:border-slate-200'
+                    } ${
+                      dragOverIndex?.section === 'certifications' && dragOverIndex?.index === index
+                        ? 'border-indigo-400 shadow-md ring-2 ring-indigo-100 scale-[1.01] bg-indigo-50/30'
+                        : ''
+                    }`}
+                  >
                     <div className="flex items-center justify-between gap-2 mb-3">
-                      <p className="font-bold text-xs text-slate-700 uppercase tracking-wider">Certification #{index + 1}</p>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-slate-700 cursor-grab active:cursor-grabbing transition-colors"
+                          title="Drag to Reorder"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" />
+                          </svg>
+                        </div>
+                        <p className="font-bold text-xs text-slate-700 uppercase tracking-wider">Certification #{index + 1}</p>
+                      </div>
                       <div className="flex items-center gap-1.5">
                         <button
                           type="button"
@@ -1175,9 +1432,35 @@ export const ResumeEditor = () => {
             ) : (
               <div className="space-y-4">
                 {(resume.sections.relevantCoursework?.items || []).map((item: any, index: number) => (
-                  <div key={item.id} className="rounded-xl border border-slate-100 bg-slate-50/45 p-4 hover:border-slate-200 transition-all duration-200">
+                  <div
+                    key={item.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, 'relevantCoursework', index)}
+                    onDragOver={(e) => handleDragOver(e, 'relevantCoursework', index)}
+                    onDrop={(e) => handleDrop(e, 'relevantCoursework', index)}
+                    onDragEnd={handleDragEnd}
+                    className={`rounded-xl border p-4 transition-all duration-200 ${
+                      draggedItem?.section === 'relevantCoursework' && draggedItem?.index === index
+                        ? 'opacity-40 border-dashed border-indigo-400 bg-slate-100 scale-95'
+                        : 'border-slate-100 bg-slate-50/45 hover:border-slate-200'
+                    } ${
+                      dragOverIndex?.section === 'relevantCoursework' && dragOverIndex?.index === index
+                        ? 'border-indigo-400 shadow-md ring-2 ring-indigo-100 scale-[1.01] bg-indigo-50/30'
+                        : ''
+                    }`}
+                  >
                     <div className="flex items-center justify-between gap-2 mb-3">
-                      <p className="font-bold text-xs text-slate-700 uppercase tracking-wider">Course #{index + 1}</p>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-slate-700 cursor-grab active:cursor-grabbing transition-colors"
+                          title="Drag to Reorder"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" />
+                          </svg>
+                        </div>
+                        <p className="font-bold text-xs text-slate-700 uppercase tracking-wider">Course #{index + 1}</p>
+                      </div>
                       <div className="flex items-center gap-1.5">
                         <button
                           type="button"
@@ -1267,9 +1550,35 @@ export const ResumeEditor = () => {
             ) : (
               <div className="space-y-6">
                 {(resume.sections.achievements?.items || []).map((item: any, index: number) => (
-                  <div key={item.id} className="rounded-xl border border-slate-100 bg-slate-50/45 p-4 hover:border-slate-200 transition-all duration-200">
+                  <div
+                    key={item.id}
+                    draggable
+                    onDragStart={(e) => handleDragStart(e, 'achievements', index)}
+                    onDragOver={(e) => handleDragOver(e, 'achievements', index)}
+                    onDrop={(e) => handleDrop(e, 'achievements', index)}
+                    onDragEnd={handleDragEnd}
+                    className={`rounded-xl border p-4 transition-all duration-200 ${
+                      draggedItem?.section === 'achievements' && draggedItem?.index === index
+                        ? 'opacity-40 border-dashed border-indigo-400 bg-slate-100 scale-95'
+                        : 'border-slate-100 bg-slate-50/45 hover:border-slate-200'
+                    } ${
+                      dragOverIndex?.section === 'achievements' && dragOverIndex?.index === index
+                        ? 'border-indigo-400 shadow-md ring-2 ring-indigo-100 scale-[1.01] bg-indigo-50/30'
+                        : ''
+                    }`}
+                  >
                     <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3 mb-4">
-                      <p className="font-bold text-xs text-slate-700 uppercase tracking-wider">Achievement #{index + 1}</p>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-slate-700 cursor-grab active:cursor-grabbing transition-colors"
+                          title="Drag to Reorder"
+                        >
+                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9h16.5m-16.5 6.75h16.5" />
+                          </svg>
+                        </div>
+                        <p className="font-bold text-xs text-slate-700 uppercase tracking-wider">Achievement #{index + 1}</p>
+                      </div>
                       <div className="flex items-center gap-1.5">
                         <button
                           type="button"
