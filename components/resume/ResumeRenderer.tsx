@@ -45,7 +45,7 @@ export const ResumeRenderer = React.memo(
     }
 
     const containerClass = printMode
-      ? 'w-full h-full p-4 bg-white'
+      ? 'w-full h-fit p-6 bg-white'
       : 'bg-white max-w-4xl mx-auto my-4 shadow-lg rounded-lg p-8';
 
     const templateProps = { resume };
