@@ -22,6 +22,7 @@ interface Resume {
         startDate: string;
         endDate: string;
         summary?: string;
+        location?: string;
       }>;
     };
     education: {
@@ -31,6 +32,8 @@ interface Resume {
         studyType: string;
         startDate: string;
         endDate: string;
+        location?: string;
+        coursework?: string;
       }>;
     };
     projects: {
@@ -40,6 +43,8 @@ interface Resume {
         description: string;
         projectUrl?: string;
         githubUrl?: string;
+        date?: string;
+        technologies?: string;
       }>;
     };
     skills: {
@@ -55,12 +60,27 @@ interface Resume {
         name: string;
       }>;
     };
+    relevantCoursework: {
+      items: Array<{
+        id: string;
+        name: string;
+      }>;
+    };
+    achievements: {
+      items: Array<{
+        id: string;
+        title: string;
+        subtitle: string;
+        startDate?: string;
+        endDate?: string;
+      }>;
+    };
   };
 }
 
 export interface ScoreBreakdownItem {
   id: string;
-  category: 'basics' | 'summary' | 'experience' | 'projects' | 'skills' | 'education' | 'certifications' | 'formatting';
+  category: 'basics' | 'summary' | 'experience' | 'projects' | 'skills' | 'education' | 'certifications' | 'coursework' | 'achievements' | 'formatting';
   title: string;
   description: string;
   score: number;
@@ -266,7 +286,7 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
       type: hasGitHub ? 'success' : 'warning',
     });
 
-    // --- 2. SUMMARY (Max 15 pts) ---
+    // --- 2. SUMMARY (Max 10 pts) ---
     const summaryText = resume.sections.summary?.content || '';
     const summaryLength = summaryText.trim().length;
     const summaryLengthOk = summaryLength >= 100 && summaryLength <= 400;
@@ -277,8 +297,8 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
       description: summaryLengthOk 
         ? 'Summary length is optimal (100-400 characters).' 
         : `Summary should be between 100-400 characters (currently: ${summaryLength} chars).`,
-      score: summaryLengthOk ? 5 : (summaryLength > 0 ? 2 : 0),
-      maxScore: 5,
+      score: summaryLengthOk ? 4 : (summaryLength > 0 ? 1 : 0),
+      maxScore: 4,
       passed: summaryLengthOk,
       type: summaryLengthOk ? 'success' : 'warning',
     });
@@ -291,8 +311,8 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
       description: hasRoleInSummary 
         ? 'Target job role/headline is clear and aligned.' 
         : 'Headline or summary should explicitly mention your target engineering role (e.g. Software Engineer).',
-      score: hasRoleInSummary ? 5 : 0,
-      maxScore: 5,
+      score: hasRoleInSummary ? 3 : 0,
+      maxScore: 3,
       passed: hasRoleInSummary,
       type: hasRoleInSummary ? 'success' : 'warning',
     });
@@ -306,13 +326,13 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
       description: hasKeywordsInSummary 
         ? 'Summary contains industry-recognized action verbs/technologies.' 
         : 'Add relevant tech keywords and action words to your summary.',
-      score: hasKeywordsInSummary ? 5 : 0,
-      maxScore: 5,
+      score: hasKeywordsInSummary ? 3 : 0,
+      maxScore: 3,
       passed: hasKeywordsInSummary,
       type: hasKeywordsInSummary ? 'success' : 'warning',
     });
 
-    // --- 3. EXPERIENCE (Max 30 pts) ---
+    // --- 3. EXPERIENCE (Max 25 pts) ---
     const expItems = resume.sections.experience?.items || [];
     const hasRolesCount = expItems.length >= 2 && expItems.length <= 4;
     breakdown.push({
@@ -322,8 +342,8 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
       description: hasRolesCount 
         ? `${expItems.length} experience entries is optimal for a 1-page resume.` 
         : 'Aim for 2 to 4 roles to showcase career progression without overcrowding a single page.',
-      score: expItems.length >= 2 ? 10 : (expItems.length === 1 ? 6 : 0),
-      maxScore: 10,
+      score: expItems.length >= 2 ? 8 : (expItems.length === 1 ? 4 : 0),
+      maxScore: 8,
       passed: expItems.length >= 2,
       type: expItems.length >= 2 ? 'success' : 'warning',
     });
@@ -336,8 +356,8 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
       description: hasBulletPoints 
         ? 'All experience roles use structured bullet points.' 
         : 'Use structured bullet points (ul/li tags) for experience instead of a block of text.',
-      score: hasBulletPoints ? 10 : 0,
-      maxScore: 10,
+      score: hasBulletPoints ? 8 : 0,
+      maxScore: 8,
       passed: hasBulletPoints,
       type: hasBulletPoints ? 'success' : 'error',
     });
@@ -368,8 +388,8 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
       description: hasStrongVerbs 
         ? 'Accomplishment points start with powerful ATS action verbs.' 
         : 'Start accomplishment points with strong action verbs (e.g. Developed, Optimized, Engineered).',
-      score: hasStrongVerbs ? 5 : 2,
-      maxScore: 5,
+      score: hasStrongVerbs ? 4 : 1,
+      maxScore: 4,
       passed: hasStrongVerbs,
       type: hasStrongVerbs ? 'success' : 'warning',
     });
@@ -466,7 +486,7 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
       type: hasModernTech ? 'success' : 'warning',
     });
 
-    // --- 6. EDUCATION & CERTIFICATIONS (Max 10 pts) ---
+    // --- 6. EDUCATION & COURSEWORK (Max 10 pts) ---
     const educationItems = resume.sections.education?.items || [];
     const hasEducation = educationItems.length > 0 && educationItems.every(edu => edu.institution && edu.studyType);
     breakdown.push({
@@ -482,6 +502,23 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
       type: hasEducation ? 'success' : 'error',
     });
 
+    const courseworkItems = resume.sections.relevantCoursework?.items || [];
+    const hasEducationCoursework = educationItems.some(edu => !!edu.coursework && edu.coursework.trim().length > 0);
+    const hasCoursework = courseworkItems.length > 0 || hasEducationCoursework;
+    breakdown.push({
+      id: 'coursework-presence',
+      category: 'coursework',
+      title: 'Relevant Coursework',
+      description: hasCoursework 
+        ? `Found ${courseworkItems.length} relevant coursework items.` 
+        : 'Add relevant coursework to support your educational background.',
+      score: hasCoursework ? 5 : 0,
+      maxScore: 5,
+      passed: hasCoursework,
+      type: hasCoursework ? 'success' : 'warning',
+    });
+
+    // --- 7. CERTIFICATIONS & ACHIEVEMENTS (Max 10 pts) ---
     const certsItems = resume.sections.certifications?.items || [];
     const hasCerts = certsItems.length > 0;
     breakdown.push({
@@ -497,12 +534,27 @@ export const useResumeStore = create<ResumeStore>((set, get) => ({
       type: hasCerts ? 'success' : 'warning',
     });
 
+    const achievementsItems = resume.sections.achievements?.items || [];
+    const hasAchievements = achievementsItems.length > 0;
+    breakdown.push({
+      id: 'achievements-presence',
+      category: 'achievements',
+      title: 'Achievements & Awards',
+      description: hasAchievements 
+        ? `Found ${achievementsItems.length} achievements/awards.` 
+        : 'Add scholarships or awards to showcase your excellence.',
+      score: hasAchievements ? 5 : 0,
+      maxScore: 5,
+      passed: hasAchievements,
+      type: hasAchievements ? 'success' : 'warning',
+    });
+
     // Calculate total score
     const totalScore = breakdown.reduce((acc, item) => acc + item.score, 0);
 
-    // --- 7. FORMATTING & PAGE LENGTH (Soft warning / penalty) ---
-    const totalItemsCount = expItems.length + projectItems.length + certsItems.length;
-    const tooManyItems = totalItemsCount > 9;
+    // --- 8. FORMATTING & PAGE LENGTH (Soft warning / penalty) ---
+    const totalItemsCount = expItems.length + projectItems.length + certsItems.length + achievementsItems.length;
+    const tooManyItems = totalItemsCount > 12;
     if (tooManyItems) {
       breakdown.push({
         id: 'formatting-length',

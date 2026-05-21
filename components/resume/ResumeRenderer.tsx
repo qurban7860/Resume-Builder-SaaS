@@ -5,7 +5,7 @@ import { Experience } from './Experience';
 import { Projects } from './Projects';
 import { Skills } from './Skills';
 import { Education } from './Education';
-import { Certifications } from './Certifications';
+import { LeadershipAwards } from './LeadershipAwards';
 
 interface Resume {
   basics: {
@@ -25,6 +25,8 @@ interface Resume {
     projects: { items: Array<any> };
     skills: { items: Array<any> };
     certifications: { items: Array<any> };
+    relevantCoursework: { items: Array<any> };
+    achievements: { items: Array<any> };
   };
 }
 
@@ -43,15 +45,18 @@ export const ResumeRenderer = React.memo(
       );
     }
 
+    const courseNames = resume.sections.relevantCoursework?.items?.map((i: any) => i.name) || [];
+    const fallbackCoursework = courseNames.join(', ');
+
     return (
       <div
         className={`bg-white ${
           printMode
-            ? 'w-full h-full'
-            : 'max-w-4xl mx-auto my-8 shadow-lg'
-        } p-8`}
+            ? 'w-full h-full p-4'
+            : 'max-w-4xl mx-auto my-8 shadow-lg p-8 rounded-lg'
+        }`}
         style={{
-          fontFamily: 'Inter, Helvetica, Calibri, sans-serif',
+          fontFamily: 'Georgia, "Times New Roman", Times, serif',
         }}
       >
         {/* Header */}
@@ -67,30 +72,30 @@ export const ResumeRenderer = React.memo(
         />
 
         {/* Summary */}
-        <div className="mb-4">
-          <Summary content={resume.sections.summary.content} />
-        </div>
+        <Summary content={resume.sections.summary?.content} />
 
-        {/* Two-Column Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-[1.8fr_1fr] gap-6 items-start">
-          {/* Main Column */}
-          <div className="space-y-4">
-            <Experience items={resume.sections.experience.items} />
-            <Projects items={resume.sections.projects.items} />
-          </div>
+        {/* Vertical Single-Column Flow */}
+        <div className="space-y-4">
+          {/* Education */}
+          <Education 
+            items={resume.sections.education.items} 
+            fallbackCoursework={fallbackCoursework}
+          />
 
-          {/* Sidebar Column */}
-          <div className="space-y-4">
-            <div className="bg-slate-50/50 border border-slate-100 rounded-xl p-4">
-              <Skills items={resume.sections.skills.items} />
-            </div>
-            <div className="bg-slate-50/50 border border-slate-100 rounded-xl p-4">
-              <Education items={resume.sections.education.items} />
-            </div>
-            <div className="bg-slate-50/50 border border-slate-100 rounded-xl p-4">
-              <Certifications items={resume.sections.certifications.items} />
-            </div>
-          </div>
+          {/* Skills */}
+          <Skills items={resume.sections.skills.items} />
+
+          {/* Experience */}
+          <Experience items={resume.sections.experience.items} />
+
+          {/* Projects */}
+          <Projects items={resume.sections.projects.items} />
+
+          {/* Leadership & Awards */}
+          <LeadershipAwards 
+            achievements={resume.sections.achievements?.items || []} 
+            certifications={resume.sections.certifications?.items || []}
+          />
         </div>
       </div>
     );

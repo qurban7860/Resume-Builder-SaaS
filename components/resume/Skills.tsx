@@ -15,18 +15,14 @@ export const Skills = React.memo(({ items }: SkillsProps) => {
 
   return (
     <section className="mb-4">
-      <h2 className="text-sm font-extrabold uppercase tracking-wider text-text-dark mb-2.5 border-b border-divider pb-1">
+      <h2 className="text-[12px] font-bold uppercase tracking-wider text-gray-950 mb-1 border-b border-gray-950 pb-0.5 font-serif">
         Skills
       </h2>
-      <div className="space-y-2">
+      <div className="space-y-1 text-[11px] text-gray-800 font-serif leading-[1.35]">
         {items.map((skill) => (
           <div key={skill.id}>
-            <h3 className="text-[11px] font-bold text-text-dark">
-              {skill.name}
-            </h3>
-            <p className="text-[10px] text-text-light leading-relaxed">
-              {skill.keywords.join(', ')}
-            </p>
+            <span className="font-bold text-gray-950">{skill.name}: </span>
+            <span>{skill.keywords.join(', ')}</span>
           </div>
         ))}
       </div>

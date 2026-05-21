@@ -23,14 +23,15 @@ export async function exportResumeToPDF(resume: any, filename: string) {
     document.body.appendChild(wrapper);
 
     const options = {
-      margin: [10, 10, 10, 10], // 10mm margins
+      margin: [8, 10, 8, 10], // 8mm top/bottom, 10mm left/right — matches @page CSS margins
       filename: filename || 'resume.pdf',
       image: { type: 'jpeg', quality: 0.98 },
       html2canvas: { 
         scale: 2, 
         useCORS: true, 
         logging: false,
-        letterRendering: true
+        letterRendering: true,
+        windowWidth: 794, // A4 at 96 DPI
       },
       jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' },
     };

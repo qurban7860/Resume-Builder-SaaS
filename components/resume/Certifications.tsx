@@ -14,14 +14,15 @@ export const Certifications = React.memo(({ items }: CertificationsProps) => {
 
   return (
     <section className="mb-4">
-      <h2 className="text-sm font-extrabold uppercase tracking-wider text-text-dark mb-2.5 border-b border-divider pb-1">
+      <h2 className="text-[13px] font-bold uppercase tracking-wider text-gray-950 mb-2 border-b border-gray-900 pb-0.5">
         Certifications
       </h2>
-      <div className="space-y-1">
+      <div className="space-y-1 text-[11.5px] text-gray-800">
         {items.map((cert) => (
-          <p key={cert.id} className="text-[10px] text-text-dark leading-relaxed">
-            • {cert.name}
-          </p>
+          <div key={cert.id} className="leading-relaxed flex items-start gap-1.5">
+            <span className="text-gray-400">•</span>
+            <span>{cert.name}</span>
+          </div>
         ))}
       </div>
     </section>

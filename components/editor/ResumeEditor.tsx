@@ -43,6 +43,7 @@ export const ResumeEditor = () => {
       companyUrl: '',
       startDate: '',
       endDate: '',
+      location: '',
       summary: '<ul><li>Add your accomplishment</li></ul>',
     };
     if (!resume) return;
@@ -106,6 +107,7 @@ export const ResumeEditor = () => {
         description: 'Add a short description.',
         projectUrl: '',
         githubUrl: '',
+        technologies: '',
       },
     ];
     updateSection('projects', { items });
@@ -117,7 +119,7 @@ export const ResumeEditor = () => {
     updateSection('projects', { items });
   };
 
-  const handleEducationChange = (index: number, field: 'institution' | 'studyType' | 'startDate' | 'endDate', value: string) => {
+  const handleEducationChange = (index: number, field: string, value: string) => {
     if (!resume) return;
     const items = resume.sections.education.items.map((item: any, itemIndex: number) =>
       itemIndex === index ? { ...item, [field]: value } : item
@@ -135,6 +137,8 @@ export const ResumeEditor = () => {
         studyType: 'Degree or Certificate',
         startDate: '',
         endDate: '',
+        location: '',
+        coursework: '',
       },
     ];
     updateSection('education', { items });
@@ -172,7 +176,66 @@ export const ResumeEditor = () => {
     updateSection('certifications', { items });
   };
 
-  const moveItem = (section: 'experience' | 'projects' | 'skills' | 'education' | 'certifications', index: number, direction: 'up' | 'down') => {
+  const handleCourseworkChange = (index: number, value: string) => {
+    if (!resume) return;
+    const items = (resume.sections.relevantCoursework?.items || []).map((item: any, itemIndex: number) =>
+      itemIndex === index ? { ...item, name: value } : item
+    );
+    updateSection('relevantCoursework', { items });
+  };
+
+  const addCourseworkItem = () => {
+    if (!resume) return;
+    const items = [
+      ...(resume.sections.relevantCoursework?.items || []),
+      {
+        id: typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `rc-${Date.now()}`,
+        name: 'New Course',
+      },
+    ];
+    updateSection('relevantCoursework', { items });
+  };
+
+  const removeCourseworkItem = (index: number) => {
+    if (!resume) return;
+    const items = (resume.sections.relevantCoursework?.items || []).filter((_: any, itemIndex: number) => itemIndex !== index);
+    updateSection('relevantCoursework', { items });
+  };
+
+  const handleAchievementChange = (index: number, field: string, value: string) => {
+    if (!resume) return;
+    const items = (resume.sections.achievements?.items || []).map((item: any, itemIndex: number) =>
+      itemIndex === index ? { ...item, [field]: value } : item
+    );
+    updateSection('achievements', { items });
+  };
+
+  const addAchievementItem = () => {
+    if (!resume) return;
+    const items = [
+      ...(resume.sections.achievements?.items || []),
+      {
+        id: typeof crypto !== 'undefined' && 'randomUUID' in crypto ? crypto.randomUUID() : `ach-${Date.now()}`,
+        title: 'New Achievement',
+        subtitle: '',
+        startDate: '',
+        endDate: '',
+      },
+    ];
+    updateSection('achievements', { items });
+  };
+
+  const removeAchievementItem = (index: number) => {
+    if (!resume) return;
+    const items = (resume.sections.achievements?.items || []).filter((_: any, itemIndex: number) => itemIndex !== index);
+    updateSection('achievements', { items });
+  };
+
+  const moveItem = (
+    section: 'experience' | 'projects' | 'skills' | 'education' | 'certifications' | 'relevantCoursework' | 'achievements',
+    index: number,
+    direction: 'up' | 'down'
+  ) => {
     if (!resume) return;
     const targetIndex = direction === 'up' ? index - 1 : index + 1;
     if (targetIndex < 0) return;
@@ -329,7 +392,7 @@ export const ResumeEditor = () => {
                     onChange={(event) => handleExperienceChange(index, 'title', event.target.value)}
                   />
                 </div>
-                <div className="grid gap-4 sm:grid-cols-2">
+                <div className="grid gap-4 sm:grid-cols-3">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Company Name</label>
                     <input
@@ -342,8 +405,18 @@ export const ResumeEditor = () => {
                     <label className="block text-sm font-medium text-gray-700">Company URL</label>
                     <input
                       className={createInputClass()}
+                      placeholder="e.g. https://company.com"
                       value={item.companyUrl || ''}
                       onChange={(event) => handleExperienceChange(index, 'companyUrl', event.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Location</label>
+                    <input
+                      className={createInputClass()}
+                      placeholder="e.g. Chicago, IL"
+                      value={item.location || ''}
+                      onChange={(event) => handleExperienceChange(index, 'location', event.target.value)}
                     />
                   </div>
                 </div>
@@ -487,15 +560,26 @@ export const ResumeEditor = () => {
                 </div>
               </div>
               <div className="grid gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">Project Name</label>
-                  <input
-                    className={createInputClass()}
-                    value={item.name}
-                    onChange={(event) => handleProjectChange(index, 'name', event.target.value)}
-                  />
-                </div>
                 <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Project Name</label>
+                    <input
+                      className={createInputClass()}
+                      value={item.name}
+                      onChange={(event) => handleProjectChange(index, 'name', event.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Technologies (e.g., Python, React, AWS)</label>
+                    <input
+                      className={createInputClass()}
+                      placeholder="e.g. Next.js, TypeScript, PostgreSQL"
+                      value={item.technologies || ''}
+                      onChange={(event) => handleProjectChange(index, 'technologies', event.target.value)}
+                    />
+                  </div>
+                </div>
+                <div className="grid gap-4 sm:grid-cols-3">
                   <div>
                     <label className="block text-sm font-medium text-gray-700">Demo URL (Live Site)</label>
                     <input
@@ -510,6 +594,14 @@ export const ResumeEditor = () => {
                       className={createInputClass()}
                       value={item.githubUrl || ''}
                       onChange={(event) => handleProjectChange(index, 'githubUrl', event.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Date (e.g., 04/2025)</label>
+                    <input
+                      className={createInputClass()}
+                      value={item.date || ''}
+                      onChange={(event) => handleProjectChange(index, 'date', event.target.value)}
                     />
                   </div>
                 </div>
@@ -604,6 +696,26 @@ export const ResumeEditor = () => {
                     />
                   </div>
                 </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Location</label>
+                    <input
+                      className={createInputClass()}
+                      placeholder="e.g. Chicago, IL"
+                      value={item.location || ''}
+                      onChange={(event) => handleEducationChange(index, 'location', event.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Relevant Coursework</label>
+                    <input
+                      className={createInputClass()}
+                      placeholder="e.g. Data Mining, Statistics, OOP"
+                      value={item.coursework || ''}
+                      onChange={(event) => handleEducationChange(index, 'coursework', event.target.value)}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           ))}
@@ -659,6 +771,146 @@ export const ResumeEditor = () => {
                   value={item.name}
                   onChange={(event) => handleCertificationChange(index, event.target.value)}
                 />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Relevant Coursework */}
+      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-900">Relevant Coursework</h2>
+          <button
+            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            onClick={addCourseworkItem}
+          >
+            Add Course
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          {(resume.sections.relevantCoursework?.items || []).map((item: any, index: number) => (
+            <div key={item.id} className="rounded-xl border border-gray-200 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+                <p className="font-semibold text-gray-900">Course #{index + 1}</p>
+                <div className="flex flex-wrap gap-2 items-center">
+                  <button
+                    type="button"
+                    className="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50"
+                    onClick={() => moveItem('relevantCoursework', index, 'up')}
+                    disabled={index === 0}
+                  >
+                    ↑
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50"
+                    onClick={() => moveItem('relevantCoursework', index, 'down')}
+                    disabled={index === (resume.sections.relevantCoursework?.items || []).length - 1}
+                  >
+                    ↓
+                  </button>
+                  <button
+                    className="text-sm text-red-600 hover:text-red-800"
+                    onClick={() => removeCourseworkItem(index)}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Course Name</label>
+                <input
+                  className={createInputClass()}
+                  value={item.name}
+                  onChange={(event) => handleCourseworkChange(index, event.target.value)}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Achievements */}
+      <div className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-900">Achievements</h2>
+          <button
+            className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            onClick={addAchievementItem}
+          >
+            Add Achievement
+          </button>
+        </div>
+
+        <div className="space-y-4">
+          {(resume.sections.achievements?.items || []).map((item: any, index: number) => (
+            <div key={item.id} className="rounded-xl border border-gray-200 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+                <p className="font-semibold text-gray-900">Achievement #{index + 1}</p>
+                <div className="flex flex-wrap gap-2 items-center">
+                  <button
+                    type="button"
+                    className="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50"
+                    onClick={() => moveItem('achievements', index, 'up')}
+                    disabled={index === 0}
+                  >
+                    ↑
+                  </button>
+                  <button
+                    type="button"
+                    className="rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50"
+                    onClick={() => moveItem('achievements', index, 'down')}
+                    disabled={index === (resume.sections.achievements?.items || []).length - 1}
+                  >
+                    ↓
+                  </button>
+                  <button
+                    className="text-sm text-red-600 hover:text-red-800"
+                    onClick={() => removeAchievementItem(index)}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+
+              <div className="grid gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Title</label>
+                  <input
+                    className={createInputClass()}
+                    value={item.title}
+                    onChange={(event) => handleAchievementChange(index, 'title', event.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Subtitle / Issuer</label>
+                  <input
+                    className={createInputClass()}
+                    value={item.subtitle || ''}
+                    onChange={(event) => handleAchievementChange(index, 'subtitle', event.target.value)}
+                  />
+                </div>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">Start Date / Year</label>
+                    <input
+                      className={createInputClass()}
+                      value={item.startDate}
+                      onChange={(event) => handleAchievementChange(index, 'startDate', event.target.value)}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700">End Date / Year (Optional)</label>
+                    <input
+                      className={createInputClass()}
+                      value={item.endDate || ''}
+                      onChange={(event) => handleAchievementChange(index, 'endDate', event.target.value)}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
           ))}

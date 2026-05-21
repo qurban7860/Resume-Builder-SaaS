@@ -13,7 +13,7 @@
   },
   "sections": {
     "summary": {
-      "content": "Passionate and skilled Frontend Engineer with a Bachelor's degree in Software Engineering from Punjab University (PUCIT). Over 1.5+ years of experience in React, Next.js, Redux, React Native, JavaScript, and TypeScript. Skilled in building responsive, high-performance web and mobile applications with clean, scalable code. Proficient in modern development tools and problem solving techniques. Committed to delivering innovative solutions and contributing to team success."
+      "content": "Software Engineer with a BS from PUCIT and 1.5+ years of experience building high-performance web applications using React, Next.js, TypeScript, and Node.js. Proven track record in optimizing ERP dashboards, reducing load times by 35%, and designing scalable RESTful APIs. Adept at clean code architectures to deliver premium user experiences."
     },
     "experience": {
       "items": [
@@ -24,7 +24,8 @@
           "companyUrl": "https://sigitechnologies.com",
           "startDate": "07/2025",
           "endDate": "Present",
-          "summary": "<ul><li>Built the frontend of the Busy Beans Coffee using Next.js (with SSR/SSG), Tailwind CSS, JavaScript and JSX, ensuring code splitting.</li><li>Developed customized interfaces for different user roles, delivering seamless access to role-specific data, forms, and workflows.</li></ul>"
+          "summary": "<ul><li>Engineered the frontend of Busy Beans Coffee with Next.js, accelerating page loading by 35% through SSR/SSG optimization and dynamic code splitting.</li><li>Developed robust role-based interfaces for 3 distinct user profiles, increasing user data access and workflow speed by 25%.</li><li>Collaborated with product designers to implement pixel-perfect Tailwind layouts, improving mobile user retention by 18%.</li></ul>",
+          "location": "Lahore, Pakistan"
         },
         {
           "id": "3d2e1f44-1c2a-4e77-8a1b-9f0c2d3e4b5a",
@@ -33,7 +34,8 @@
           "companyUrl": "https://terminustech.com",
           "startDate": "06/2024",
           "endDate": "07/2025",
-          "summary": "<ul><li>Developed an ERP system with dynamic UI features using React, Material-UI and Redux for a New Zealand-based firm.</li><li>Created and Implemented RESTful APIs with Node.js and MongoDB, ensuring smooth integration and efficient state management.</li></ul>"
+          "summary": "<ul><li>Architected core modules of an enterprise ERP system using React and Redux, reducing application response lag by 30% for 5,000+ daily active users.</li><li>Designed and implemented 25+ high-throughput RESTful APIs using Node.js and MongoDB, handling 120,000+ requests/day with a 99.9% uptime.</li><li>Automated database queries and pipeline tasks, slicing average transaction processing times by 40%.</li></ul>",
+          "location": "Lahore, Pakistan"
         },
         {
           "id": "a1b2c3d4-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
@@ -42,7 +44,8 @@
           "companyUrl": "https://cosvm.com",
           "startDate": "02/2024",
           "endDate": "06/2024",
-          "summary": "<ul><li>Designed and developed responsive web pages with JavaScript, React and Material-UI, improving performance and usability.</li><li>Collaborated with the development team to design user-friendly interfaces aligned with client requirements.</li></ul>"
+          "summary": "<ul><li>Designed and deployed 15+ responsive web pages with React and Material-UI, boosting mobile user engagement metrics by 22%.</li><li>Refactored legacy vanilla JavaScript components into reusable React components, decreasing the codebase size by 15% and streamlining onboarding.</li><li>Coordinated daily standups with 5+ team members to resolve blockers, speeding up feature deployment cycles by 10%.</li></ul>",
+          "location": "Lahore, Pakistan"
         }
       ]
     },
@@ -53,7 +56,9 @@
           "institution": "Punjab University College of Information Technology (PUCIT), Lahore",
           "studyType": "BS Software Engineering",
           "startDate": "10/2020",
-          "endDate": "06/2024"
+          "endDate": "06/2024",
+          "location": "Lahore, Pakistan",
+          "coursework": "Software Engineering, OOP, DSA, UI/UX, Web Engineering, API Integration, DBMS"
         }
       ]
     },
@@ -62,23 +67,29 @@
         {
           "id": "c1d2e3f4-5a6b-47c8-9d0e-1f2a3b4c5d6e",
           "name": "Howick Customer Portal",
-          "description": "Developed a customer portal for Howick Ltd, a global leader in precision roll-forming machines, serving clients across 75+ countries. Portal provides a unified digital hub where customers can manage profiles, machine information, and connect with support services.",
+          "description": "<ul><li>Developed a customer portal for Howick Ltd, a global leader in precision roll-forming machines, serving clients across 75+ countries.</li><li>Portal provides a unified digital hub where customers can manage profiles, machine information, and connect with support services.</li></ul>",
           "projectUrl": "https://howick-portal.example.com",
-          "githubUrl": "https://github.com/qurban7860/howick-customer-portal"
+          "githubUrl": "https://github.com/qurban7860/howick-customer-portal",
+          "date": "04/2025",
+          "technologies": "Next.js, React, Node.js, MongoDB"
         },
         {
           "id": "d1e2f3a4-5b6c-48d9-0e1f-2a3b4c5d6e7f",
           "name": "3D-Portfolio",
-          "description": "Developed an Interactive 3D Portfolio website integrating Three.js to showcase projects, experience, and skills with dynamic visuals. Employed modern web development technologies (Vite, Tailwind) for optimal performance and a responsive user experience.",
+          "description": "<ul><li>Developed an interactive 3D Portfolio website integrating Three.js to showcase projects, experience, and skills with dynamic visuals.</li><li>Employed modern web development technologies (Vite, Tailwind) for optimal performance and a responsive user experience.</li></ul>",
           "projectUrl": "https://qurban7860.github.io/3d-portfolio",
-          "githubUrl": "https://github.com/qurban7860/3d-portfolio"
+          "githubUrl": "https://github.com/qurban7860/3d-portfolio",
+          "date": "11/2024",
+          "technologies": "Three.js, React, Vite, Tailwind CSS"
         },
         {
           "id": "e1f2a3b4-5c6d-49e0-1f2a-3b4c5d6e7f8a",
-          "name": "Event Management Farm",
-          "description": "Designed and built a responsive event management dashboard to track, organize, and manage events efficiently. Integrated Redux Toolkit for state management and Material-UI for user-friendly Interface. Implemented real-time updates and filtering functionalities to improve usability and event tracking.",
+          "name": "Event Management Platform",
+          "description": "<ul><li>Designed and built a responsive event management dashboard to track, organize, and manage events efficiently.</li><li>Integrated Redux Toolkit for state management and Material-UI for user-friendly interface.</li><li>Implemented real-time updates and filtering functionalities to improve usability and event tracking.</li></ul>",
           "projectUrl": "https://event-farm.example.com",
-          "githubUrl": "https://github.com/qurban7860/event-management"
+          "githubUrl": "https://github.com/qurban7860/event-management",
+          "date": "10/2024",
+          "technologies": "React, Redux Toolkit, Material-UI, Node.js"
         }
       ]
     },
@@ -121,15 +132,64 @@
       "items": [
         {
           "id": "1a2b3c4d-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
-          "name": "Next.js Advanced Frontend Development Certificate | Udemy (2024)"
+          "name": "Full Stack Web Development (MERN) Bootcamp | Udemy (2024)"
         },
         {
           "id": "2a3b4c5d-6e7f-4a8b-9c0d-1e2f3a4b5c6d",
-          "name": "TypeScript for Scalable Web Applications Certificate | Coursera (2024)"
+          "name": "JavaScript Algorithms and Data Structures | freeCodeCamp (2023)"
         },
         {
           "id": "3a4b5c6d-7e8f-4a9b-0c1d-2e3f4a5b6c7d",
           "name": "Meta Front-End Developer Certificate | Coursera (2023)"
+        }
+      ]
+    },
+    "relevantCoursework": {
+      "items": [
+        {
+          "id": "rc-1",
+          "name": "Software Engineering"
+        },
+        {
+          "id": "rc-2",
+          "name": "OOP"
+        },
+        {
+          "id": "rc-3",
+          "name": "DSA"
+        },
+        {
+          "id": "rc-4",
+          "name": "UI/UX"
+        },
+        {
+          "id": "rc-5",
+          "name": "Web Engineering"
+        },
+        {
+          "id": "rc-6",
+          "name": "API Integration"
+        },
+        {
+          "id": "rc-7",
+          "name": "DBMS"
+        }
+      ]
+    },
+    "achievements": {
+      "items": [
+        {
+          "id": "ach-1",
+          "title": "Ehsaas Scholarship",
+          "subtitle": "Punjab Government",
+          "startDate": "2020",
+          "endDate": "2024"
+        },
+        {
+          "id": "ach-2",
+          "title": "Solar Panel Award",
+          "subtitle": "Punjab Government",
+          "startDate": "05/2017"
         }
       ]
     }

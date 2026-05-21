@@ -8,6 +8,7 @@ interface ExperienceItem {
   startDate: string;
   endDate: string;
   summary?: string;
+  location?: string;
 }
 
 interface ExperienceCardProps {
@@ -16,38 +17,40 @@ interface ExperienceCardProps {
 
 export const ExperienceCard = React.memo(({ item }: ExperienceCardProps) => {
   return (
-    <div className="mb-4">
+    <div className="mb-3 font-serif">
       <div className="flex justify-between items-baseline">
-        <div>
-          <h3 className="text-[13px] font-bold text-text-dark leading-tight">{item.title}</h3>
-          <p className="text-body text-text-light font-medium">
-            {item.companyUrl ? (
-              <a 
-                href={item.companyUrl} 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="hover:underline hover:text-blue-600 inline-flex items-center gap-0.5"
-              >
-                {item.company}
-                <svg className="w-2.5 h-2.5 inline stroke-current" fill="none" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                  <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                  <polyline points="15 3 21 3 21 9"/>
-                  <line x1="10" y1="14" x2="21" y2="3"/>
-                </svg>
-              </a>
-            ) : (
-              item.company
-            )}
-          </p>
+        <div className="text-[11.5px] text-gray-950 font-bold leading-tight">
+          {item.companyUrl ? (
+            <a 
+              href={item.companyUrl} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="hover:underline inline-flex items-center gap-0.5"
+            >
+              <span>{item.company}</span>
+              <svg className="w-[9px] h-[9px] text-blue-600 fill-none stroke-current inline-block" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                <polyline points="15 3 21 3 21 9"></polyline>
+                <line x1="10" y1="14" x2="21" y2="3"></line>
+              </svg>
+            </a>
+          ) : (
+            <span>{item.company}</span>
+          )}
         </div>
-        <p className="text-[10px] text-text-light font-medium whitespace-nowrap">
-          {item.startDate} - {item.endDate}
-        </p>
+        <div className="text-[11px] text-gray-950 font-bold whitespace-nowrap">
+          {item.startDate} – {item.endDate}
+        </div>
+      </div>
+
+      <div className="flex justify-between items-baseline text-[11px] text-gray-800">
+        <div className="italic font-medium">{item.title}</div>
+        {item.location && <div className="italic">{item.location}</div>}
       </div>
 
       {item.summary && (
         <div
-          className="text-body text-text-dark mt-1.5 space-y-1 list-disc-bullets"
+          className="text-[10.5px] text-gray-800 mt-1 space-y-0.5 leading-[1.35] [&_ul]:list-disc [&_ul]:pl-4 [&_li]:list-item"
           dangerouslySetInnerHTML={{ __html: item.summary }}
         />
       )}
@@ -66,7 +69,7 @@ export const Experience = React.memo(({ items }: ExperienceProps) => {
 
   return (
     <section className="mb-4">
-      <h2 className="text-sm font-extrabold uppercase tracking-wider text-text-dark mb-2.5 border-b border-divider pb-1">
+      <h2 className="text-[12px] font-bold uppercase tracking-wider text-gray-950 mb-1 border-b border-gray-950 pb-0.5 font-serif">
         Experience
       </h2>
       <div className="space-y-3">

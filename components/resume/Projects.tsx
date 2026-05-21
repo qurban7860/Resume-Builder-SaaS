@@ -6,6 +6,8 @@ interface ProjectItem {
   description: string;
   projectUrl?: string;
   githubUrl?: string;
+  date?: string;
+  technologies?: string;
 }
 
 interface ProjectsProps {
@@ -17,53 +19,71 @@ export const Projects = React.memo(({ items }: ProjectsProps) => {
 
   return (
     <section className="mb-4">
-      <h2 className="text-sm font-extrabold uppercase tracking-wider text-text-dark mb-2.5 border-b border-divider pb-1">
+      <h2 className="text-[12px] font-bold uppercase tracking-wider text-gray-950 mb-1 border-b border-gray-950 pb-0.5 font-serif">
         Projects
       </h2>
-      <div className="space-y-3">
-        {items.map((project) => (
-          <div key={project.id} className="mb-2">
-            <div className="flex justify-between items-baseline">
-              <h3 className="text-[13px] font-bold text-text-dark">
-                {project.name}
-              </h3>
-              
-              <div className="flex gap-2 text-[10px] font-semibold text-blue-600">
-                {project.projectUrl && (
-                  <a 
-                    href={project.projectUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="hover:underline flex items-center gap-0.5"
-                  >
-                    Demo
-                    <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
-                      <polyline points="15 3 21 3 21 9"/>
-                      <line x1="10" y1="14" x2="21" y2="3"/>
-                    </svg>
-                  </a>
-                )}
-                {project.githubUrl && (
-                  <a 
-                    href={project.githubUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="hover:underline flex items-center gap-0.5"
-                  >
-                    Code
-                    <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                      <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
-                    </svg>
-                  </a>
+      <div className="space-y-3 font-serif">
+        {items.map((project) => {
+          const isHtml = project.description.includes('<li') || project.description.includes('<ul');
+          const sentences = isHtml 
+            ? [] 
+            : project.description
+                .split(/\.(?=\s|[A-Z]|$)/)
+                .map(s => s.trim())
+                .filter(s => s.length > 0);
+
+          const primaryUrl = project.projectUrl || project.githubUrl;
+
+          return (
+            <div key={project.id} className="text-[11.5px] leading-[1.4]">
+              <div className="flex justify-between items-baseline">
+                <div className="text-[11.5px] text-gray-950 font-bold">
+                  {primaryUrl ? (
+                    <a 
+                      href={primaryUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="hover:underline inline-flex items-center gap-0.5"
+                    >
+                      <span>{project.name}</span>
+                      <svg className="w-[9px] h-[9px] text-blue-600 fill-none stroke-current inline-block" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                        <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path>
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <line x1="10" y1="14" x2="21" y2="3"></line>
+                      </svg>
+                    </a>
+                  ) : (
+                    <span>{project.name}</span>
+                  )}
+                  {project.technologies && (
+                    <span className="font-normal text-gray-800">
+                      {' | '}
+                      <span className="italic">{project.technologies}</span>
+                    </span>
+                  )}
+                </div>
+                {project.date && (
+                  <div className="text-[11px] text-gray-950 font-bold whitespace-nowrap">
+                    {project.date}
+                  </div>
                 )}
               </div>
+
+              {isHtml ? (
+                <div
+                  className="text-[10.5px] text-gray-800 mt-1 space-y-0.5 leading-[1.35] [&_ul]:list-disc [&_ul]:pl-4 [&_li]:list-item"
+                  dangerouslySetInnerHTML={{ __html: project.description }}
+                />
+              ) : (
+                <ul className="text-[10.5px] text-gray-800 mt-1 list-disc pl-4 space-y-0.5 leading-[1.35]">
+                  {sentences.map((sentence, idx) => (
+                    <li key={idx}>{sentence}.</li>
+                  ))}
+                </ul>
+              )}
             </div>
-            <p className="text-body text-text-dark mt-1 leading-normal">
-              {project.description}
-            </p>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );
