@@ -1,5 +1,35 @@
 import { useState } from 'react';
+import dynamic from 'next/dynamic';
 import { useResumeStore } from '@/store/useResumeStore';
+import { normalizePlainText, sanitizeRichText } from '@/lib/textUtils';
+
+const ReactQuill = dynamic(() => import('react-quill'), {
+  ssr: false,
+  loading: () => <div className="p-4 text-sm text-slate-500">Loading editor…</div>,
+});
+
+const quillModules = {
+  toolbar: [
+    [{ header: [1, 2, false] }],
+    ['bold', 'italic', 'underline', 'strike'],
+    [{ list: 'ordered' }, { list: 'bullet' }],
+    ['link', 'blockquote', 'code-block'],
+    ['clean'],
+  ],
+};
+
+const quillFormats = [
+  'header',
+  'bold',
+  'italic',
+  'underline',
+  'strike',
+  'list',
+  'bullet',
+  'link',
+  'blockquote',
+  'code-block',
+];
 
 // ─── AI enhance helper ───────────────────────────────────────────────
 async function callAiEnhance(type: 'bullet' | 'summary' | 'keywords', text: string, jobTitle?: string): Promise<string> {
@@ -53,16 +83,7 @@ export const ResumeEditor = () => {
     setDragOverIndex(null);
   };
 
-  const stripHtmlTags = (value: string) =>
-    value
-      .replace(/<\/li>/gi, '\n')
-      .replace(/<li[^>]*>/gi, '')
-      .replace(/<br\s*\/?\>/gi, '\n')
-      .replace(/<[^>]+>/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-
-  const normalizeTextInput = (value: string) => stripHtmlTags(value);
+  const normalizeTextInput = (value: string) => normalizePlainText(value);
 
   if (!resume) return null;
 
@@ -88,7 +109,7 @@ export const ResumeEditor = () => {
 
   const handleSummaryChange = (value: string) => {
     if (!resume) return;
-    updateSection('summary', { content: normalizeTextInput(value) });
+    updateSection('summary', { content: sanitizeRichText(value) });
   };
 
   const handleExperienceChange = (index: number, field: string, value: string) => {
@@ -97,7 +118,7 @@ export const ResumeEditor = () => {
       itemIndex === index
         ? {
             ...item,
-            [field]: field === 'summary' ? normalizeTextInput(value) : value,
+            [field]: field === 'summary' ? sanitizeRichText(value) : value,
           }
         : item
     );
@@ -180,7 +201,7 @@ export const ResumeEditor = () => {
     if (!resume) return;
     const items = resume.sections.projects.items.map((item: any, itemIndex: number) =>
       itemIndex === index
-        ? { ...item, [field]: field === 'description' ? normalizeTextInput(value) : value }
+        ? { ...item, [field]: field === 'description' ? sanitizeRichText(value) : value }
         : item
     );
     updateSection('projects', { items });
@@ -402,7 +423,7 @@ export const ResumeEditor = () => {
     );
   };
 
-  const summaryLen = resume.sections?.summary?.content?.length ?? 0;
+  const summaryLen = normalizePlainText(resume.sections?.summary?.content || '').length;
 
   return (
     <div className="space-y-4 animate-fade-in">
@@ -536,10 +557,17 @@ export const ResumeEditor = () => {
                         onClick={async () => {
                           try {
                             setAiLoading('summary');
-                            const enhanced = await callAiEnhance('summary', resume.sections.summary.content, resume.basics.headline);
+                            const enhanced = await callAiEnhance(
+                              'summary',
+                              normalizePlainText(resume.sections.summary.content),
+                              resume.basics.headline
+                            );
                             setAiDiff({ key: 'summary', original: resume.sections.summary.content, enhanced });
-                          } catch { setAiLoading(null); }
-                          finally { setAiLoading(null); }
+                          } catch {
+                            setAiLoading(null);
+                          } finally {
+                            setAiLoading(null);
+                          }
                         }}
                         className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-violet-50 text-violet-700 border border-violet-200 hover:bg-violet-100 text-[10px] font-bold transition-all active:scale-95 disabled:opacity-50"
                         title="AI-powered summary generator"
@@ -568,11 +596,14 @@ export const ResumeEditor = () => {
                       </div>
                     </div>
                   )}
-                  <textarea
-                    className="w-full min-h-[120px] rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 transition-all duration-200 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:shadow-sm"
-                    placeholder="Draft your professional summary..."
+                  <ReactQuill
+                    theme="snow"
                     value={resume.sections.summary.content}
-                    onChange={(event) => handleSummaryChange(event.target.value)}
+                    onChange={handleSummaryChange}
+                    modules={quillModules}
+                    formats={quillFormats}
+                    placeholder="Draft your professional summary..."
+                    className="bg-white"
                   />
                   <p className="text-[10px] text-slate-400 mt-1 font-medium italic">Optimal: 100-400 chars for ATS scanning.</p>
                 </div>
@@ -797,11 +828,14 @@ export const ResumeEditor = () => {
                             </div>
                           </div>
                         )}
-                        <textarea
-                          className="w-full min-h-[100px] rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-800 transition-all duration-200 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:shadow-sm font-mono text-xs"
+                        <ReactQuill
+                          theme="snow"
                           value={item.summary}
+                          onChange={(value) => handleExperienceChange(index, 'summary', value)}
+                          modules={quillModules}
+                          formats={quillFormats}
                           placeholder="e.g. Achieved 30% faster load time by refactoring React components"
-                          onChange={(event) => handleExperienceChange(index, 'summary', event.target.value)}
+                          className="bg-white"
                         />
                         <p className="text-[10px] text-slate-400 mt-1.5 font-medium">Use plain-text bullets or short lines. HTML tags are removed automatically.</p>
                       </div>
@@ -1104,11 +1138,14 @@ export const ResumeEditor = () => {
                             {item.description.length}/40+ chars
                           </span>
                         </div>
-                        <textarea
-                          className="w-full min-h-[100px] rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-800 transition-all duration-200 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:shadow-sm"
+                        <ReactQuill
+                          theme="snow"
                           value={item.description}
+                          onChange={(value) => handleProjectChange(index, 'description', value)}
+                          modules={quillModules}
+                          formats={quillFormats}
                           placeholder="Provide details about your project accomplishments..."
-                          onChange={(event) => handleProjectChange(index, 'description', event.target.value)}
+                          className="bg-white"
                         />
                       </div>
                     </div>

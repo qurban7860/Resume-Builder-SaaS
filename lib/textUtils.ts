@@ -1,3 +1,7 @@
+import createDOMPurify from 'isomorphic-dompurify';
+
+const DOMPurify = createDOMPurify();
+
 export function stripHtmlTags(value = '') {
   return value
     .replace(/<\/li>/gi, '\n')
@@ -10,6 +14,13 @@ export function stripHtmlTags(value = '') {
 
 export function normalizePlainText(value = '') {
   return stripHtmlTags(value);
+}
+
+export function sanitizeRichText(value = '') {
+  return DOMPurify.sanitize(value, {
+    ALLOWED_TAGS: ['b', 'strong', 'i', 'em', 'u', 'p', 'br', 'ul', 'ol', 'li', 'a', 'span'],
+    ALLOWED_ATTR: ['href', 'target', 'rel'],
+  });
 }
 
 export function splitPlainTextToBullets(value = '') {

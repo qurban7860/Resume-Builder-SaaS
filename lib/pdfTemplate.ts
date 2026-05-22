@@ -1,3 +1,5 @@
+import { sanitizeRichText } from './textUtils';
+
 export function escapeHtml(value: string) {
   return value
     .replace(/&/g, '&amp;')
@@ -41,28 +43,6 @@ const stripHtmlTags = (value: string = '') =>
     .replace(/<[^>]+>/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
-
-const splitPlainTextToBullets = (value: string = '') => {
-  const normalized = stripHtmlTags(value);
-  if (!normalized) return [];
-
-  const lines = normalized
-    .split(/(?:\r?\n|•|·|\u2022|\u2023|\u25E6|\u2043|\u2219|\s-\s)+/)
-    .map((line) => line.trim())
-    .filter(Boolean);
-
-  if (lines.length > 1) {
-    return lines;
-  }
-
-  const sentences = normalized
-    .split(/\.(?=\s|$)/)
-    .map((sentence) => sentence.trim())
-    .filter(Boolean)
-    .map((sentence) => `${sentence}.`);
-
-  return sentences.length > 1 ? sentences : lines;
-};
 
 export const pageStyle = `
   * {
@@ -264,7 +244,7 @@ function renderResumeBodyHTML(resume: any) {
   const basics = resume.basics || {};
   const sections = resume.sections || {};
 
-  const summaryHTML = escapeHtml(sections.summary?.content || '');
+  const summaryHTML = sanitizeRichText(sections.summary?.content || '');
 
   // Render contact info with links
   const contactParts: string[] = [];
@@ -327,11 +307,7 @@ function renderResumeBodyHTML(resume: any) {
   // Render experience
   const experienceHTML = (sections.experience?.items || [])
     .map((item: any) => {
-      const summaryText = stripHtmlTags(item.summary || '');
-      const summaryBullets = splitPlainTextToBullets(item.summary || '');
-      const summaryMarkup = summaryBullets.length > 1
-        ? `<ul>${summaryBullets.map((line: string) => `<li>${escapeHtml(line)}</li>`).join('')}</ul>`
-        : `<p style="margin: 0; font-size: 11px; line-height: 1.5; color: #222222;">${escapeHtml(summaryText)}</p>`;
+      const summaryMarkup = sanitizeRichText(item.summary || '') || `<p style="margin: 0; font-size: 11px; line-height: 1.5; color: #222222;">${escapeHtml(stripHtmlTags(item.summary || ''))}</p>`;
       
       const companyMarkup = item.companyUrl 
         ? `<a href="${escapeHtml(item.companyUrl)}" target="_blank" style="font-weight: bold; color: #111111;">${escapeHtml(item.company)}${linkIconSvg}</a>`
@@ -358,11 +334,7 @@ function renderResumeBodyHTML(resume: any) {
   // Render projects
   const projectsHTML = (sections.projects?.items || [])
     .map((project: any) => {
-      const descriptionText = stripHtmlTags(project.description || '');
-      const descriptionBullets = splitPlainTextToBullets(project.description || '');
-      const descMarkup = descriptionBullets.length > 1
-        ? `<ul>${descriptionBullets.map((line: string) => `<li>${escapeHtml(line)}</li>`).join('')}</ul>`
-        : `<p style="margin: 0; font-size: 11px; line-height: 1.5; color: #222222;">${escapeHtml(descriptionText)}</p>`;
+      const descMarkup = sanitizeRichText(project.description || '') || `<p style="margin: 0; font-size: 11px; line-height: 1.5; color: #222222;">${escapeHtml(stripHtmlTags(project.description || ''))}</p>`;
 
       const primaryUrl = project.projectUrl || project.githubUrl;
 

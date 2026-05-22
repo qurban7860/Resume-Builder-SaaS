@@ -1,5 +1,5 @@
 import React from 'react';
-import { normalizePlainText, splitPlainTextToBullets } from '@/lib/textUtils';
+import { sanitizeRichText } from '@/lib/textUtils';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const getLinkedinSlug = (url: string) => {
@@ -42,6 +42,13 @@ const SectionTitle = ({ children }: { children: React.ReactNode }) => (
     </h2>
     <div className="flex-1 h-px bg-gray-300" />
   </div>
+);
+
+const renderHtml = (value: string, className: string) => (
+  <div
+    className={`${className} [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:mt-1`}
+    dangerouslySetInnerHTML={{ __html: sanitizeRichText(value) }}
+  />
 );
 
 interface Resume {
@@ -98,17 +105,7 @@ export const ExecutiveTemplate = React.memo(({ resume }: { resume: Resume }) => 
       {sections.summary?.content && (
         <section className="mb-2.5">
           <SectionTitle>Summary</SectionTitle>
-          {(() => {
-            const summaryText = normalizePlainText(sections.summary.content);
-            const summaryBullets = splitPlainTextToBullets(sections.summary.content);
-            return summaryBullets.length > 1 ? (
-              <ul className="text-[10.5px] text-[#374151] mt-1 list-disc pl-4 space-y-1 leading-[1.55]">
-                {summaryBullets.map((line, idx) => <li key={idx}>{line}</li>)}
-              </ul>
-            ) : (
-              <p style={{ fontSize: '10.5px', lineHeight: '1.55', color: '#374151', textAlign: 'justify' }}>{summaryText}</p>
-            );
-          })()}
+          {renderHtml(sections.summary.content, 'text-[10.5px] leading-[1.55] text-[#374151]')}
         </section>
       )}
 
@@ -179,17 +176,7 @@ export const ExecutiveTemplate = React.memo(({ resume }: { resume: Resume }) => 
                     {item.startDate} – {item.endDate}
                   </div>
                 </div>
-                {item.summary && (() => {
-                  const summaryText = normalizePlainText(item.summary);
-                  const summaryBullets = splitPlainTextToBullets(item.summary);
-                  return summaryBullets.length > 1 ? (
-                    <ul className="text-[10.5px] text-[#374151] mt-3 list-disc pl-4 space-y-1 leading-[1.5]">
-                      {summaryBullets.map((line, idx) => <li key={idx}>{line}</li>)}
-                    </ul>
-                  ) : (
-                    <p style={{ fontSize: '10.5px', color: '#374151', marginTop: '3px', lineHeight: '1.5' }}>{summaryText}</p>
-                  );
-                })()}
+                {item.summary && renderHtml(item.summary, 'text-[10.5px] mt-3 leading-[1.5] text-[#374151]')}
               </div>
             ))}
           </div>
@@ -216,17 +203,7 @@ export const ExecutiveTemplate = React.memo(({ resume }: { resume: Resume }) => 
                     </div>
                     {proj.date && <div style={{ fontSize: '10.5px', fontStyle: 'italic', color: MUTED, whiteSpace: 'nowrap', marginLeft: '8px' }}>{proj.date}</div>}
                   </div>
-                  {(() => {
-                    const text = normalizePlainText(proj.description || '');
-                    const bullets = splitPlainTextToBullets(proj.description || '');
-                    return bullets.length > 1 ? (
-                      <ul className="text-[10.5px] text-[#374151] mt-3 list-disc pl-4 space-y-1 leading-[1.5]">
-                        {bullets.map((line, i) => <li key={i} style={{ marginBottom: '2px' }}>{line}</li>)}
-                      </ul>
-                    ) : (
-                      <p style={{ fontSize: '10.5px', color: '#374151', marginTop: '3px', lineHeight: '1.5' }}>{text}</p>
-                    );
-                  })()}
+                  {proj.description && renderHtml(proj.description, 'text-[10.5px] mt-3 leading-[1.5] text-[#374151]')}
                 </div>
               );
             })}

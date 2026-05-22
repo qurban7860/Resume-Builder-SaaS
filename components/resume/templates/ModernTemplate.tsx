@@ -1,5 +1,5 @@
 import React from 'react';
-import { normalizePlainText, splitPlainTextToBullets } from '@/lib/textUtils';
+import { sanitizeRichText } from '@/lib/textUtils';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const getLinkedinSlug = (url: string) => {
@@ -35,6 +35,13 @@ const SectionTitle = ({ children }: { children: React.ReactNode }) => (
   >
     {children}
   </h2>
+);
+
+const renderHtml = (value: string, className: string) => (
+  <div
+    className={`${className} [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:mt-1`}
+    dangerouslySetInnerHTML={{ __html: sanitizeRichText(value) }}
+  />
 );
 
 interface Resume {
@@ -89,17 +96,7 @@ export const ModernTemplate = React.memo(({ resume }: { resume: Resume }) => {
       {sections.summary?.content && (
         <section className="mb-2.5">
           <SectionTitle>Summary</SectionTitle>
-          {(() => {
-          const summaryText = normalizePlainText(sections.summary.content);
-          const summaryBullets = splitPlainTextToBullets(sections.summary.content);
-          return summaryBullets.length > 1 ? (
-            <ul className="text-[10.5px] text-[#374151] mt-1 list-disc pl-4 space-y-1 leading-6">
-              {summaryBullets.map((line, idx) => <li key={idx}>{line}</li>)}
-            </ul>
-          ) : (
-            <p style={{ fontSize: '10.5px', lineHeight: '1.5', color: '#374151' }}>{summaryText}</p>
-          );
-        })()}
+          {renderHtml(sections.summary.content, 'text-[10.5px] text-[#374151] leading-[1.5]')}
         </section>
       )}
 
@@ -170,17 +167,7 @@ export const ModernTemplate = React.memo(({ resume }: { resume: Resume }) => {
                     {item.startDate} – {item.endDate}
                   </div>
                 </div>
-                {item.summary && (() => {
-                  const summaryText = normalizePlainText(item.summary);
-                  const summaryBullets = splitPlainTextToBullets(item.summary);
-                  return summaryBullets.length > 1 ? (
-                    <ul className="text-[10.5px] text-[#374151] mt-3 list-disc pl-4 space-y-1 leading-[1.45]">
-                      {summaryBullets.map((line, idx) => <li key={idx}>{line}</li>)}
-                    </ul>
-                  ) : (
-                    <p style={{ fontSize: '10.5px', color: '#374151', marginTop: '3px', lineHeight: '1.45' }}>{summaryText}</p>
-                  );
-                })()}
+                {item.summary && renderHtml(item.summary, 'text-[10.5px] text-[#374151] mt-3 leading-[1.45]')}
               </div>
             ))}
           </div>
@@ -207,17 +194,7 @@ export const ModernTemplate = React.memo(({ resume }: { resume: Resume }) => {
                     </div>
                     {proj.date && <div style={{ fontSize: '10.5px', fontWeight: 600, color: '#64748b', whiteSpace: 'nowrap', marginLeft: '8px' }}>{proj.date}</div>}
                   </div>
-                  {(() => {
-                    const text = normalizePlainText(proj.description || '');
-                    const bullets = splitPlainTextToBullets(proj.description || '');
-                    return bullets.length > 1 ? (
-                      <ul className="text-[10.5px] text-[#374151] mt-3 list-disc pl-4 space-y-1 leading-[1.45]">
-                        {bullets.map((line, i) => <li key={i} style={{ marginBottom: '2px' }}>{line}</li>)}
-                      </ul>
-                    ) : (
-                      <p style={{ fontSize: '10.5px', color: '#374151', marginTop: '3px', lineHeight: '1.45' }}>{text}</p>
-                    );
-                  })()}
+                  {proj.description && renderHtml(proj.description, 'text-[10.5px] text-[#374151] mt-3 leading-[1.45]')}
                 </div>
               );
             })}
