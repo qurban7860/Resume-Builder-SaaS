@@ -196,7 +196,7 @@ export default function Dashboard() {
     <div className="min-h-screen lg:h-screen lg:overflow-hidden flex flex-col bg-slate-50 font-sans antialiased text-slate-800">
       
       {/* ── Top Premium Glassmorphic Header ── */}
-      <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30 px-4 py-3 sm:px-6 sm:py-4 flex justify-between items-center shadow-[0_1px_3px_rgba(0,0,0,0.02)]">
+      <header className="bg-white/80 backdrop-blur-md border-b border-slate-200/80 sticky top-0 z-30 px-3 py-2 sm:px-6 sm:py-4 flex justify-between items-center shadow-[0_1px_3px_rgba(0,0,0,0.02)] overflow-x-auto">
         <div className="flex items-center gap-2 sm:gap-4">
           <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-tr from-indigo-600 to-violet-600 flex items-center justify-center text-white font-black text-sm sm:text-base shadow-md shadow-indigo-150">
             R
@@ -286,13 +286,28 @@ export default function Dashboard() {
                 </>
               ) : (
                 <>
-                  <span>📥 Export PDF</span>
+                  <span className='line-clamp-1'>📥 Export PDF</span>
                 </>
               )}
             </button>
           </div>
         </div>
       </header>
+
+      {/* Mobile action menu: visible on small screens to surface hidden buttons */}
+      <div className="md:hidden bg-white/95 border-b border-slate-200/80">
+        <div className="max-w-7xl mx-auto px-4 py-2 flex items-center justify-end gap-2">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleExportPDF}
+              title="Export PDF"
+              className="px-3 py-1.5 bg-gradient-to-r from-indigo-600 to-violet-600 text-white rounded-lg shadow-sm font-bold text-[10px] uppercase tracking-wider active:scale-[0.97] transition-all duration-200"
+            >
+              📥
+            </button>
+          </div>
+        </div>
+      </div>
  
       {/* ── Mobile Tab Switcher (visible only below lg) ── */}
       <div className="lg:hidden flex items-center bg-white border-b border-slate-200 no-print" role="tablist" aria-label="Panel switcher">
