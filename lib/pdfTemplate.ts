@@ -33,6 +33,37 @@ const getWebsiteDisplay = (url: string) => {
   return clean.split('?')[0].replace(/\/+$/, '');
 };
 
+const stripHtmlTags = (value: string = '') =>
+  value
+    .replace(/<\/li>/gi, '\n')
+    .replace(/<li[^>]*>/gi, '')
+    .replace(/<br\s*\/?\>/gi, '\n')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const splitPlainTextToBullets = (value: string = '') => {
+  const normalized = stripHtmlTags(value);
+  if (!normalized) return [];
+
+  const lines = normalized
+    .split(/(?:\r?\n|•|·|\u2022|\u2023|\u25E6|\u2043|\u2219|\s-\s)+/)
+    .map((line) => line.trim())
+    .filter(Boolean);
+
+  if (lines.length > 1) {
+    return lines;
+  }
+
+  const sentences = normalized
+    .split(/\.(?=\s|$)/)
+    .map((sentence) => sentence.trim())
+    .filter(Boolean)
+    .map((sentence) => `${sentence}.`);
+
+  return sentences.length > 1 ? sentences : lines;
+};
+
 export const pageStyle = `
   * {
     box-sizing: border-box;
@@ -296,7 +327,11 @@ function renderResumeBodyHTML(resume: any) {
   // Render experience
   const experienceHTML = (sections.experience?.items || [])
     .map((item: any) => {
-      const summaryMarkup = item.summary || '';
+      const summaryText = stripHtmlTags(item.summary || '');
+      const summaryBullets = splitPlainTextToBullets(item.summary || '');
+      const summaryMarkup = summaryBullets.length > 1
+        ? `<ul>${summaryBullets.map((line: string) => `<li>${escapeHtml(line)}</li>`).join('')}</ul>`
+        : `<p style="margin: 0; font-size: 11px; line-height: 1.5; color: #222222;">${escapeHtml(summaryText)}</p>`;
       
       const companyMarkup = item.companyUrl 
         ? `<a href="${escapeHtml(item.companyUrl)}" target="_blank" style="font-weight: bold; color: #111111;">${escapeHtml(item.company)}${linkIconSvg}</a>`
@@ -323,13 +358,11 @@ function renderResumeBodyHTML(resume: any) {
   // Render projects
   const projectsHTML = (sections.projects?.items || [])
     .map((project: any) => {
-      const isHtml = project.description.includes('<li') || project.description.includes('<ul');
-      const sentences = isHtml 
-        ? [] 
-        : project.description
-            .split(/\.(?=\s|[A-Z]|$)/)
-            .map((s: string) => s.trim())
-            .filter((s: string) => s.length > 0);
+      const descriptionText = stripHtmlTags(project.description || '');
+      const descriptionBullets = splitPlainTextToBullets(project.description || '');
+      const descMarkup = descriptionBullets.length > 1
+        ? `<ul>${descriptionBullets.map((line: string) => `<li>${escapeHtml(line)}</li>`).join('')}</ul>`
+        : `<p style="margin: 0; font-size: 11px; line-height: 1.5; color: #222222;">${escapeHtml(descriptionText)}</p>`;
 
       const primaryUrl = project.projectUrl || project.githubUrl;
 
@@ -340,10 +373,6 @@ function renderResumeBodyHTML(resume: any) {
       const techMarkup = project.technologies
         ? ` | <span class="italic">${escapeHtml(project.technologies)}</span>`
         : '';
-
-      const descMarkup = isHtml
-        ? project.description
-        : `<ul>${sentences.map((s: string) => `<li>${escapeHtml(s)}.</li>`).join('')}</ul>`;
 
       return `
         <div class="section-block">
@@ -547,128 +576,6 @@ const vercelPageStyle = `
   li { font-family: 'Inter', sans-serif; color: #404040; font-size: 10.5px; }
 `;
 
-// ─── Linear: high-tech indigo accents, ultra-clean ────────────────────────────
-const linearPageStyle = `
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-  html, body {
-    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif !important;
-    color: #0f172a;
-  }
-  .resume-container { background: #ffffff; }
-  .header {
-    background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
-    border-bottom: 2px solid #6366f1;
-    padding: 12px 0 10px;
-    margin-bottom: 12px;
-  }
-  .header h1 {
-    font-size: 25px;
-    font-weight: 700;
-    color: #0f172a;
-    letter-spacing: -0.02em;
-  }
-  .header .headline {
-    font-size: 11px;
-    font-weight: 500;
-    text-transform: none;
-    letter-spacing: 0.01em;
-    color: #6366f1;
-  }
-  .header .contact-row { color: #475569; font-size: 10px; }
-  .header .contact-row a { color: #6366f1; }
-  .section-title {
-    font-family: 'Inter', sans-serif;
-    font-size: 10.5px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #6366f1;
-    border-bottom: 1.5px solid #c7d2fe;
-    padding-bottom: 2px;
-    margin-top: 14px;
-    margin-bottom: 5px;
-  }
-  .item-left { font-family: 'Inter', sans-serif; color: #0f172a; }
-  .item-left .bold { font-weight: 600; color: #1e293b; }
-  .item-right { font-family: 'Inter', sans-serif; color: #6366f1; font-weight: 500; font-size: 10px; }
-  .skills-row { font-family: 'Inter', sans-serif; color: #334155; }
-  li { font-family: 'Inter', sans-serif; color: #334155; font-size: 10.5px; }
-`;
-
-// ─── Stripe: elegant dual-column (left 30% sidebar, right 70% main) ─────────
-const stripePageStyle = `
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-  html, body {
-    font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif !important;
-    color: #0f172a;
-    background: #f8fafc;
-  }
-  .resume-container { background: #f8fafc; }
-  .header {
-    background: #0f172a;
-    color: #ffffff;
-    padding: 16px 14px;
-    margin-bottom: 0;
-    border-bottom: 3px solid #0ea5e9;
-  }
-  .header h1 { font-size: 22px; font-weight: 700; color: #ffffff; letter-spacing: -0.02em; margin-bottom: 2px; }
-  .header .headline { font-size: 11px; color: #7dd3fc; font-weight: 400; text-transform: none; letter-spacing: 0; }
-  .header .contact-row { color: #94a3b8; font-size: 9.5px; }
-  .header .contact-row a { color: #38bdf8; }
-  .section-title {
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    color: #0ea5e9;
-    border-bottom: 1.5px solid #e0f2fe;
-    margin-top: 12px;
-    margin-bottom: 5px;
-  }
-  .item-left .bold { font-weight: 600; color: #0f172a; }
-  .item-right { color: #0ea5e9; font-size: 10px; font-weight: 500; }
-  li { color: #334155; font-size: 10.5px; }
-`;
-
-// ─── Notion: clean blocky serif layout ────────────────────────────────────────
-const notionPageStyle = `
-  html, body {
-    font-family: Georgia, 'Times New Roman', serif;
-    color: #111827;
-    background: #f9fafb;
-  }
-  .resume-container { background: #f9fafb; }
-  .header {
-    border-bottom: none;
-    margin-bottom: 4px;
-    padding-bottom: 6px;
-    border-left: 4px solid #374151;
-    padding-left: 12px;
-  }
-  .header h1 { font-size: 24px; font-weight: 700; color: #111827; letter-spacing: -0.01em; }
-  .header .headline { font-family: Georgia, serif; font-size: 12px; color: #6b7280; font-weight: normal; font-style: italic; text-transform: none; letter-spacing: 0; }
-  .header .contact-row { color: #6b7280; font-size: 10px; }
-  .header .contact-row a { color: #374151; }
-  .section-title {
-    font-family: Georgia, serif;
-    font-size: 12px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: #111827;
-    border-bottom: none;
-    background: #f3f4f6;
-    padding: 3px 6px;
-    margin-top: 14px;
-    margin-bottom: 5px;
-  }
-  .item-left .bold { font-weight: 700; color: #111827; }
-  .item-left .italic { color: #6b7280; }
-  .item-right { color: #9ca3af; font-weight: normal; font-style: italic; font-size: 10.5px; }
-  li { color: #374151; font-size: 10.5px; }
-  .skills-row { color: #374151; }
-`;
-
 function renderExecutiveHeader(basics: any): string {
   const contactParts: string[] = [];
   if (basics.location) contactParts.push(`<span style="display:inline-flex;align-items:center;">${locationSvg}<span>${escapeHtml(basics.location)}</span></span>`);
@@ -717,15 +624,6 @@ export function renderResumeHTML(resume: any, templateId: string = 'classic') {
   } else if (templateId === 'vercel') {
     extraStyle = vercelPageStyle;
     // Vercel uses same centered header layout as classic but with vercel styles
-    headerHTML = '';
-  } else if (templateId === 'linear') {
-    extraStyle = linearPageStyle;
-    headerHTML = '';
-  } else if (templateId === 'stripe') {
-    extraStyle = stripePageStyle;
-    headerHTML = '';
-  } else if (templateId === 'notion') {
-    extraStyle = notionPageStyle;
     headerHTML = '';
   } else {
     // Classic — use default header from body render

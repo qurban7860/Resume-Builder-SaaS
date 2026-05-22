@@ -1,4 +1,5 @@
 import React from 'react';
+import { normalizePlainText, splitPlainTextToBullets } from '@/lib/textUtils';
 
 interface ProjectItem {
   id: string;
@@ -24,14 +25,6 @@ export const Projects = React.memo(({ items }: ProjectsProps) => {
       </h2>
       <div className="space-y-3 font-serif">
         {items.map((project) => {
-          const isHtml = project.description.includes('<li') || project.description.includes('<ul');
-          const sentences = isHtml 
-            ? [] 
-            : project.description
-                .split(/\.(?=\s|[A-Z]|$)/)
-                .map(s => s.trim())
-                .filter(s => s.length > 0);
-
           const primaryUrl = project.projectUrl || project.githubUrl;
 
           return (
@@ -69,18 +62,19 @@ export const Projects = React.memo(({ items }: ProjectsProps) => {
                 )}
               </div>
 
-              {isHtml ? (
-                <div
-                  className="text-[10.5px] text-gray-800 mt-1 space-y-0.5 leading-[1.35] [&_ul]:list-disc [&_ul]:pl-4 [&_li]:list-item"
-                  dangerouslySetInnerHTML={{ __html: project.description }}
-                />
-              ) : (
-                <ul className="text-[10.5px] text-gray-800 mt-1 list-disc pl-4 space-y-0.5 leading-[1.35]">
-                  {sentences.map((sentence, idx) => (
-                    <li key={idx}>{sentence}.</li>
-                  ))}
-                </ul>
-              )}
+              {(() => {
+                const descriptionText = normalizePlainText(project.description);
+                const descriptionBullets = splitPlainTextToBullets(project.description);
+                return descriptionBullets.length > 1 ? (
+                  <ul className="text-[10.5px] text-gray-800 mt-1 list-disc pl-4 space-y-1 leading-[1.35]">
+                    {descriptionBullets.map((sentence, idx) => (
+                      <li key={idx}>{sentence}</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-[10.5px] text-gray-800 mt-1 leading-[1.35]">{descriptionText}</p>
+                );
+              })()}
             </div>
           );
         })}

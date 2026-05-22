@@ -3,7 +3,7 @@ import { useTemplateStore } from '@/store/useTemplateStore';
 import { ClassicTemplate } from './templates/ClassicTemplate';
 import { ModernTemplate } from './templates/ModernTemplate';
 import { ExecutiveTemplate } from './templates/ExecutiveTemplate';
-import { VercelTemplate, LinearTemplate, StripeTemplate, NotionTemplate } from './templates/AdvancedTemplates';
+import { VercelTemplate } from './templates/AdvancedTemplates';
 
 interface Resume {
   basics: {
@@ -46,19 +46,16 @@ export const ResumeRenderer = React.memo(
     }
 
     const containerClass = printMode
-      ? 'w-full h-full bg-white'
+      ? 'w-full bg-white'
       : 'bg-white max-w-4xl mx-auto my-4 shadow-lg rounded-lg p-8';
 
     const templateProps = { resume };
 
     return (
-      <div className={containerClass} style={printMode ? { padding: '8mm 10mm' } : undefined}>
+      <div className={containerClass} style={printMode ? { padding: '8mm 10mm', minHeight: '297mm' } : undefined}>
         {templateId === 'modern'    && <ModernTemplate    {...templateProps} />}
         {templateId === 'executive' && <ExecutiveTemplate {...templateProps} />}
         {templateId === 'vercel'    && <VercelTemplate    {...templateProps} />}
-        {templateId === 'linear'    && <LinearTemplate    {...templateProps} />}
-        {templateId === 'stripe'    && <StripeTemplate    {...templateProps} />}
-        {templateId === 'notion'    && <NotionTemplate    {...templateProps} />}
         {(templateId === 'classic' || !templateId) && <ClassicTemplate {...templateProps} />}
       </div>
     );

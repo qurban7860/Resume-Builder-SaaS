@@ -1,4 +1,5 @@
 import React from 'react';
+import { normalizePlainText, splitPlainTextToBullets } from '@/lib/textUtils';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const getLinkedinSlug = (url: string) => {
@@ -97,9 +98,17 @@ export const ExecutiveTemplate = React.memo(({ resume }: { resume: Resume }) => 
       {sections.summary?.content && (
         <section className="mb-2.5">
           <SectionTitle>Summary</SectionTitle>
-          <p style={{ fontSize: '10.5px', lineHeight: '1.55', color: '#374151', textAlign: 'justify' }}>
-            {sections.summary.content}
-          </p>
+          {(() => {
+            const summaryText = normalizePlainText(sections.summary.content);
+            const summaryBullets = splitPlainTextToBullets(sections.summary.content);
+            return summaryBullets.length > 1 ? (
+              <ul className="text-[10.5px] text-[#374151] mt-1 list-disc pl-4 space-y-1 leading-[1.55]">
+                {summaryBullets.map((line, idx) => <li key={idx}>{line}</li>)}
+              </ul>
+            ) : (
+              <p style={{ fontSize: '10.5px', lineHeight: '1.55', color: '#374151', textAlign: 'justify' }}>{summaryText}</p>
+            );
+          })()}
         </section>
       )}
 
@@ -170,13 +179,17 @@ export const ExecutiveTemplate = React.memo(({ resume }: { resume: Resume }) => 
                     {item.startDate} – {item.endDate}
                   </div>
                 </div>
-                {item.summary && (
-                  <div
-                    className="[&_ul]:list-disc [&_ul]:pl-4 [&_li]:list-item [&_li]:mb-[2px]"
-                    style={{ fontSize: '10.5px', color: '#374151', marginTop: '3px', lineHeight: '1.5' }}
-                    dangerouslySetInnerHTML={{ __html: item.summary }}
-                  />
-                )}
+                {item.summary && (() => {
+                  const summaryText = normalizePlainText(item.summary);
+                  const summaryBullets = splitPlainTextToBullets(item.summary);
+                  return summaryBullets.length > 1 ? (
+                    <ul className="text-[10.5px] text-[#374151] mt-3 list-disc pl-4 space-y-1 leading-[1.5]">
+                      {summaryBullets.map((line, idx) => <li key={idx}>{line}</li>)}
+                    </ul>
+                  ) : (
+                    <p style={{ fontSize: '10.5px', color: '#374151', marginTop: '3px', lineHeight: '1.5' }}>{summaryText}</p>
+                  );
+                })()}
               </div>
             ))}
           </div>
@@ -189,8 +202,6 @@ export const ExecutiveTemplate = React.memo(({ resume }: { resume: Resume }) => 
           <SectionTitle>Projects</SectionTitle>
           <div className="space-y-2">
             {sections.projects.items.map((proj: any) => {
-              const isHtml = proj.description?.includes('<li') || proj.description?.includes('<ul');
-              const sentences = isHtml ? [] : (proj.description || '').split(/\.(?=\s|[A-Z]|$)/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
               const primaryUrl = proj.projectUrl || proj.githubUrl;
               return (
                 <div key={proj.id}>
@@ -205,13 +216,17 @@ export const ExecutiveTemplate = React.memo(({ resume }: { resume: Resume }) => 
                     </div>
                     {proj.date && <div style={{ fontSize: '10.5px', fontStyle: 'italic', color: MUTED, whiteSpace: 'nowrap', marginLeft: '8px' }}>{proj.date}</div>}
                   </div>
-                  {isHtml ? (
-                    <div className="[&_ul]:list-disc [&_ul]:pl-4 [&_li]:list-item [&_li]:mb-[2px]" style={{ fontSize: '10.5px', color: '#374151', marginTop: '3px', lineHeight: '1.5' }} dangerouslySetInnerHTML={{ __html: proj.description }} />
-                  ) : (
-                    <ul style={{ fontSize: '10.5px', color: '#374151', marginTop: '3px', paddingLeft: '16px', lineHeight: '1.5', listStyleType: 'disc' }}>
-                      {sentences.map((s: string, i: number) => <li key={i} style={{ marginBottom: '2px' }}>{s}.</li>)}
-                    </ul>
-                  )}
+                  {(() => {
+                    const text = normalizePlainText(proj.description || '');
+                    const bullets = splitPlainTextToBullets(proj.description || '');
+                    return bullets.length > 1 ? (
+                      <ul className="text-[10.5px] text-[#374151] mt-3 list-disc pl-4 space-y-1 leading-[1.5]">
+                        {bullets.map((line, i) => <li key={i} style={{ marginBottom: '2px' }}>{line}</li>)}
+                      </ul>
+                    ) : (
+                      <p style={{ fontSize: '10.5px', color: '#374151', marginTop: '3px', lineHeight: '1.5' }}>{text}</p>
+                    );
+                  })()}
                 </div>
               );
             })}

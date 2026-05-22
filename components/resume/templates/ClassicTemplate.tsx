@@ -1,4 +1,5 @@
 import React from 'react';
+import { normalizePlainText, splitPlainTextToBullets } from '@/lib/textUtils';
 
 // ─── Shared helpers ─────────────────────────────────────────────────────────
 const getLinkedinSlug = (url: string) => {
@@ -90,7 +91,17 @@ export const ClassicTemplate = React.memo(({ resume }: { resume: Resume }) => {
       {sections.summary?.content && (
         <section className="mb-2">
           <SectionTitle>Summary</SectionTitle>
-          <p className="text-[10.5px] text-gray-800 leading-[1.45]">{sections.summary.content}</p>
+          {(() => {
+            const summaryText = normalizePlainText(sections.summary.content);
+            const summaryBullets = splitPlainTextToBullets(sections.summary.content);
+            return summaryBullets.length > 1 ? (
+              <ul className="text-[10.5px] text-gray-800 leading-[1.45] list-disc pl-4 space-y-1">
+                {summaryBullets.map((line, idx) => <li key={idx}>{line}</li>)}
+              </ul>
+            ) : (
+              <p className="text-[10.5px] text-gray-800 leading-[1.45]">{summaryText}</p>
+            );
+          })()}
         </section>
       )}
 
@@ -159,12 +170,19 @@ export const ClassicTemplate = React.memo(({ resume }: { resume: Resume }) => {
                   </div>
                   <div className="text-[11px] font-bold text-gray-950 whitespace-nowrap ml-2">{item.startDate} – {item.endDate}</div>
                 </div>
-                {item.summary && (
-                  <div
-                    className="text-[10.5px] text-gray-800 mt-0.5 leading-[1.4] [&_ul]:list-disc [&_ul]:pl-4 [&_li]:list-item [&_li]:mb-[2px]"
-                    dangerouslySetInnerHTML={{ __html: item.summary }}
-                  />
-                )}
+                {item.summary && (() => {
+                  const text = normalizePlainText(item.summary);
+                  const bullets = splitPlainTextToBullets(item.summary);
+                  return bullets.length > 1 ? (
+                    <ul className="text-[10.5px] text-gray-800 mt-0.5 list-disc pl-4 leading-[1.4] space-y-[2px]">
+                      {bullets.map((line, idx) => (
+                        <li key={idx}>{line}</li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-[10.5px] text-gray-800 mt-0.5 leading-[1.4]">{text}</p>
+                  );
+                })()}
               </div>
             ))}
           </div>
@@ -177,8 +195,6 @@ export const ClassicTemplate = React.memo(({ resume }: { resume: Resume }) => {
           <SectionTitle>Projects</SectionTitle>
           <div className="space-y-2">
             {sections.projects.items.map((proj: any) => {
-              const isHtml = proj.description?.includes('<li') || proj.description?.includes('<ul');
-              const sentences = isHtml ? [] : (proj.description || '').split(/\.(?=\s|[A-Z]|$)/).map((s: string) => s.trim()).filter((s: string) => s.length > 0);
               const primaryUrl = proj.projectUrl || proj.githubUrl;
               return (
                 <div key={proj.id}>
@@ -193,13 +209,17 @@ export const ClassicTemplate = React.memo(({ resume }: { resume: Resume }) => {
                     </div>
                     {proj.date && <div className="text-[11px] font-bold text-gray-950 whitespace-nowrap ml-2">{proj.date}</div>}
                   </div>
-                  {isHtml ? (
-                    <div className="text-[10.5px] text-gray-800 mt-0.5 leading-[1.4] [&_ul]:list-disc [&_ul]:pl-4 [&_li]:list-item [&_li]:mb-[2px]" dangerouslySetInnerHTML={{ __html: proj.description }} />
-                  ) : (
-                    <ul className="text-[10.5px] text-gray-800 mt-0.5 list-disc pl-4 leading-[1.4] space-y-[2px]">
-                      {sentences.map((s: string, i: number) => <li key={i}>{s}.</li>)}
-                    </ul>
-                  )}
+                  {(() => {
+                    const text = normalizePlainText(proj.description || '');
+                    const bullets = splitPlainTextToBullets(proj.description || '');
+                    return bullets.length > 1 ? (
+                      <ul className="text-[10.5px] text-gray-800 mt-0.5 list-disc pl-4 leading-[1.4] space-y-[2px]">
+                        {bullets.map((line: string, i: number) => <li key={i}>{line}</li>)}
+                      </ul>
+                    ) : (
+                      <p className="text-[10.5px] text-gray-800 mt-0.5 leading-[1.4]">{text}</p>
+                    );
+                  })()}
                 </div>
               );
             })}

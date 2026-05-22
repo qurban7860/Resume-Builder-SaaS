@@ -1,4 +1,4 @@
-export type TemplateId = 'classic' | 'modern' | 'executive' | 'vercel' | 'linear' | 'stripe' | 'notion';
+export type TemplateId = 'classic' | 'modern' | 'executive' | 'vercel';
 
 export interface TemplateConfig {
   id: TemplateId;
@@ -45,29 +45,5 @@ export const TEMPLATES: TemplateConfig[] = [
     badge: 'Vercel · Netlify',
     accent: '#000000',
     preview: { bg: '#fafafa', bar: '#000000', text: '#171717' },
-  },
-  {
-    id: 'linear',
-    name: 'Linear',
-    description: 'High-tech dark-adjacent with violet accents — for engineers who mean business.',
-    badge: 'Linear · Figma',
-    accent: '#6366f1',
-    preview: { bg: '#ffffff', bar: '#6366f1', text: '#0f172a' },
-  },
-  {
-    id: 'stripe',
-    name: 'Stripe',
-    description: 'Elegant dual-column layout — left sidebar with contact & skills, right for experience.',
-    badge: 'Stripe · Square',
-    accent: '#0ea5e9',
-    preview: { bg: '#f8fafc', bar: '#0ea5e9', text: '#0f172a' },
-  },
-  {
-    id: 'notion',
-    name: 'Notion',
-    description: 'Clean blocky serif — light grey section boxes, minimal color, maximum readability.',
-    badge: 'Notion · Dropbox',
-    accent: '#374151',
-    preview: { bg: '#f9fafb', bar: '#374151', text: '#111827' },
   },
 ];

@@ -1,4 +1,5 @@
 import React from 'react';
+import { normalizePlainText, splitPlainTextToBullets } from '@/lib/textUtils';
 
 interface ExperienceItem {
   id: string;
@@ -48,12 +49,17 @@ export const ExperienceCard = React.memo(({ item }: ExperienceCardProps) => {
         {item.location && <div className="italic">{item.location}</div>}
       </div>
 
-      {item.summary && (
-        <div
-          className="text-[10.5px] text-gray-800 mt-1 space-y-0.5 leading-[1.35] [&_ul]:list-disc [&_ul]:pl-4 [&_li]:list-item"
-          dangerouslySetInnerHTML={{ __html: item.summary }}
-        />
-      )}
+      {item.summary && (() => {
+        const summaryText = normalizePlainText(item.summary);
+        const summaryBullets = splitPlainTextToBullets(item.summary);
+        return summaryBullets.length > 1 ? (
+          <ul className="text-[10.5px] text-gray-800 mt-1 list-disc pl-4 space-y-1 leading-[1.35]">
+            {summaryBullets.map((line, idx) => <li key={idx}>{line}</li>)}
+          </ul>
+        ) : (
+          <p className="text-[10.5px] text-gray-800 mt-1 leading-[1.35]">{summaryText}</p>
+        );
+      })()}
     </div>
   );
 });

@@ -53,6 +53,17 @@ export const ResumeEditor = () => {
     setDragOverIndex(null);
   };
 
+  const stripHtmlTags = (value: string) =>
+    value
+      .replace(/<\/li>/gi, '\n')
+      .replace(/<li[^>]*>/gi, '')
+      .replace(/<br\s*\/?\>/gi, '\n')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+  const normalizeTextInput = (value: string) => stripHtmlTags(value);
+
   if (!resume) return null;
 
   const toggleSection = (section: string) => {
@@ -77,13 +88,18 @@ export const ResumeEditor = () => {
 
   const handleSummaryChange = (value: string) => {
     if (!resume) return;
-    updateSection('summary', { content: value });
+    updateSection('summary', { content: normalizeTextInput(value) });
   };
 
   const handleExperienceChange = (index: number, field: string, value: string) => {
     if (!resume) return;
     const items = resume.sections.experience.items.map((item: any, itemIndex: number) =>
-      itemIndex === index ? { ...item, [field]: value } : item
+      itemIndex === index
+        ? {
+            ...item,
+            [field]: field === 'summary' ? normalizeTextInput(value) : value,
+          }
+        : item
     );
     updateSection('experience', { items });
   };
@@ -101,7 +117,7 @@ export const ResumeEditor = () => {
       startDate: '',
       endDate: '',
       location: '',
-      summary: '<ul><li>Add your accomplishment</li></ul>',
+      summary: 'Add your accomplishment',
     };
     updateSection('experience', {
       items: [...resume.sections.experience.items, newItem],
@@ -163,7 +179,9 @@ export const ResumeEditor = () => {
   const handleProjectChange = (index: number, field: string, value: string) => {
     if (!resume) return;
     const items = resume.sections.projects.items.map((item: any, itemIndex: number) =>
-      itemIndex === index ? { ...item, [field]: value } : item
+      itemIndex === index
+        ? { ...item, [field]: field === 'description' ? normalizeTextInput(value) : value }
+        : item
     );
     updateSection('projects', { items });
   };
@@ -735,12 +753,12 @@ export const ResumeEditor = () => {
                       </div>
                       <div>
                         <div className="flex justify-between items-center mb-1.5">
-                          <label className={premiumLabelClass}>Summary (Accomplishments HTML)</label>
+                          <label className={premiumLabelClass}>Summary (Accomplishments)</label>
                           <button
                             type="button"
                             disabled={aiLoading === `exp-${index}`}
                             onClick={async () => {
-                              const rawText = (item.summary || '').replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+                              const rawText = normalizeTextInput(item.summary || '');
                               if (!rawText) return;
                               try {
                                 setAiLoading(`exp-${index}`);
@@ -766,9 +784,8 @@ export const ResumeEditor = () => {
                             <div className="flex gap-2 mt-2">
                               <button
                                 onClick={() => {
-                                  // Wrap in li if not already HTML
-                                  const html = aiDiff.enhanced.startsWith('<') ? aiDiff.enhanced : `<ul><li>${aiDiff.enhanced}</li></ul>`;
-                                  handleExperienceChange(index, 'summary', html);
+                                  const cleaned = normalizeTextInput(aiDiff.enhanced);
+                                  handleExperienceChange(index, 'summary', cleaned);
                                   setAiDiff(null);
                                 }}
                                 className="px-2.5 py-1 bg-violet-600 text-white rounded-md font-bold text-[10px] hover:bg-violet-700 transition-all"
@@ -783,10 +800,10 @@ export const ResumeEditor = () => {
                         <textarea
                           className="w-full min-h-[100px] rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm text-slate-800 transition-all duration-200 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-4 focus:ring-indigo-100 focus:shadow-sm font-mono text-xs"
                           value={item.summary}
-                          placeholder="e.g. <ul><li>Accomplishment 1</li></ul>"
+                          placeholder="e.g. Achieved 30% faster load time by refactoring React components"
                           onChange={(event) => handleExperienceChange(index, 'summary', event.target.value)}
                         />
-                        <p className="text-[10px] text-slate-400 mt-1.5 font-medium">Use structured HTML markup: <code>&lt;ul&gt;&lt;li&gt;Accomplishment&lt;/li&gt;&lt;/ul&gt;</code> for FAANG layouts.</p>
+                        <p className="text-[10px] text-slate-400 mt-1.5 font-medium">Use plain-text bullets or short lines. HTML tags are removed automatically.</p>
                       </div>
                     </div>
                   </div>
