@@ -372,27 +372,82 @@ const computeScore = (resume: Resume | null) => {
   return { score: Math.min(100, score), breakdown };
 };
 
+const normalizeResume = (resume: any): Resume => {
+  const empty = emptyResume();
+  if (!resume) return empty;
+
+  const rawBasics = resume.basics || {};
+  const rawSections = resume.sections || {};
+
+  const basics: Resume['basics'] = {
+    name: rawBasics.name || '',
+    headline: rawBasics.headline || '',
+    email: rawBasics.email || '',
+    phone: rawBasics.phone || '',
+    location: rawBasics.location || '',
+    url: {
+      href: rawBasics.url?.href || '',
+      label: rawBasics.url?.label || undefined,
+    },
+    linkedin: rawBasics.linkedin || '',
+    github: rawBasics.github || '',
+  };
+
+  const normalizeList = (sec: any) => {
+    if (!sec) return { items: [] };
+    return {
+      items: Array.isArray(sec.items) ? sec.items : [],
+    };
+  };
+
+  const sections: Resume['sections'] = {
+    summary: {
+      content: rawSections.summary?.content || '',
+    },
+    experience: normalizeList(rawSections.experience),
+    education: normalizeList(rawSections.education),
+    projects: normalizeList(rawSections.projects),
+    skills: normalizeList(rawSections.skills),
+    certifications: normalizeList(rawSections.certifications),
+    relevantCoursework: normalizeList(rawSections.relevantCoursework),
+    achievements: normalizeList(rawSections.achievements),
+    keyAchievements: normalizeList(rawSections.keyAchievements),
+  };
+
+  const sectionOrder = Array.isArray(resume.sectionOrder)
+    ? resume.sectionOrder
+    : empty.sectionOrder;
+
+  return {
+    basics,
+    sections,
+    sectionOrder,
+  };
+};
+
 export const useResumeStore = create<ResumeStore>()(
   persist(
-    (set, get) => ({
+    (set: any, get: any) => ({
       resume: null,
       activeWorkspace: 'default',
       versions: [],
-      setResume: (resume) => set({ resume }),
-      updateBasics: (basics) =>
-        set((state) => ({
+      setResume: (resume: Resume) => {
+        set({ resume: normalizeResume(resume) });
+      },
+      updateBasics: (basics: Resume['basics']) =>
+        set((state: any) => ({
           resume: state.resume
             ? { ...state.resume, basics: { ...state.resume.basics, ...basics } }
             : { ...emptyResume(), basics: { ...emptyResume().basics, ...basics } },
         })),
-      updateSection: (section, data) =>
-        set((state) => ({
+      updateSection: (section: keyof Resume['sections'], data: any) =>
+        set((state: any) => ({
           resume: state.resume
             ? { ...state.resume, sections: { ...state.resume.sections, [section]: data } }
             : { ...emptyResume(), sections: { ...emptyResume().sections, [section]: data } },
         })),
-      moveSectionItem: (section, fromIndex, toIndex) =>
-        set((state) => {
+      moveSectionItem: (section: keyof Resume['sections'], fromIndex: number, toIndex: number) =>
+        set((state: any) => {
           if (!state.resume) return state;
           const sectionValue = state.resume.sections[section] as { items: any[] };
           if (!sectionValue || !Array.isArray(sectionValue.items)) return state;
@@ -410,8 +465,8 @@ export const useResumeStore = create<ResumeStore>()(
             },
           };
         }),
-      moveSection: (fromIndex, toIndex) =>
-        set((state) => {
+      moveSection: (fromIndex: number, toIndex: number) =>
+        set((state: any) => {
           if (!state.resume) return state;
           const order = [...(state.resume.sectionOrder || ['keyAchievements', 'experience', 'skills', 'projects', 'education', 'certifications'])];
           if (fromIndex < 0 || toIndex < 0 || fromIndex >= order.length || toIndex >= order.length) return state;
@@ -426,9 +481,9 @@ export const useResumeStore = create<ResumeStore>()(
         }),
       getDetailedScore: () => computeScore(get().resume),
       getScore: () => computeScore(get().resume).score,
-      switchWorkspace: (id) => set({ activeWorkspace: id }),
-      saveVersion: (label) =>
-        set((state) => ({
+      switchWorkspace: (id: string) => set({ activeWorkspace: id }),
+      saveVersion: (label: string) =>
+        set((state: any) => ({
           versions: [
             ...state.versions,
             {
@@ -439,20 +494,28 @@ export const useResumeStore = create<ResumeStore>()(
             },
           ],
         })),
-      restoreVersion: (id) =>
-        set((state) => {
-          const found = state.versions.find((version) => version.id === id);
+      restoreVersion: (id: ID) =>
+        set((state: any) => {
+          const found = state.versions.find((version: any) => version.id === id);
           return found ? { resume: found.resume } : {};
         }),
-      deleteVersion: (id) =>
-        set((state) => ({
-          versions: state.versions.filter((version) => version.id !== id),
+      deleteVersion: (id: ID) =>
+        set((state: any) => ({
+          versions: state.versions.filter((version: any) => version.id !== id),
         })),
       clear: () => set({ resume: null, versions: [], activeWorkspace: 'default' }),
     }),
     {
       name: 'resume-store',
       storage: createJSONStorage(() => localStorage),
+      merge: (persistedState: any, currentState: any) => {
+        const state = { ...currentState, ...persistedState };
+        if (state.resume) {
+          state.resume = normalizeResume(state.resume);
+        }
+        return state;
+      },
     }
   )
 );
+

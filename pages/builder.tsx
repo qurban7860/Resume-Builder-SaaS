@@ -420,11 +420,11 @@ export default function Dashboard() {
             </h3>
             <div className="space-y-3.5">
               {[
-                { name: 'Professional Experience', count: resume?.sections.experience.items.length || 0, icon: '💼' },
-                { name: 'Core Skill Categories', count: resume?.sections.skills.items.length || 0, icon: '⚡' },
-                { name: 'Key Engineering Projects', count: resume?.sections.projects.items.length || 0, icon: '🚀' },
-                { name: 'Educational Institutions', count: resume?.sections.education.items.length || 0, icon: '🎓' },
-                { name: 'Industry Certifications', count: resume?.sections.certifications.items.length || 0, icon: '📜' },
+                { name: 'Professional Experience', count: resume?.sections?.experience?.items?.length || 0, icon: '💼' },
+                { name: 'Core Skill Categories', count: resume?.sections?.skills?.items?.length || 0, icon: '⚡' },
+                { name: 'Key Engineering Projects', count: resume?.sections?.projects?.items?.length || 0, icon: '🚀' },
+                { name: 'Educational Institutions', count: resume?.sections?.education?.items?.length || 0, icon: '🎓' },
+                { name: 'Industry Certifications', count: resume?.sections?.certifications?.items?.length || 0, icon: '📜' },
               ].map((sect, i) => (
                 <div key={i} className="flex items-center justify-between text-[11px] sm:text-xs">
                   <div className="flex items-center gap-2">

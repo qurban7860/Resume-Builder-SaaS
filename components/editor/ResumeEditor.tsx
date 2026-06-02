@@ -129,7 +129,7 @@ export const ResumeEditor = () => {
 
   const handleExperienceChange = (index: number, field: string, value: string) => {
     if (!resume) return;
-    const items = resume.sections.experience.items.map((item: any, itemIndex: number) =>
+    const items = (resume.sections.experience?.items || []).map((item: any, itemIndex: number) =>
       itemIndex === index
         ? {
             ...item,
@@ -156,14 +156,14 @@ export const ResumeEditor = () => {
       summary: 'Add your accomplishment',
     };
     updateSection('experience', {
-      items: [...resume.sections.experience.items, newItem],
+      items: [...(resume.sections.experience?.items || []), newItem],
     });
     setExpandedSection('experience');
   };
 
   const removeExperienceItem = (index: number) => {
     if (!resume) return;
-    const items = resume.sections.experience.items.filter((_: any, itemIndex: number) =>
+    const items = (resume.sections.experience?.items || []).filter((_: any, itemIndex: number) =>
       itemIndex !== index
     );
     updateSection('experience', { items });
@@ -171,7 +171,7 @@ export const ResumeEditor = () => {
 
   const handleSkillsChange = (index: number, field: 'name' | 'keywords', value: string) => {
     if (!resume) return;
-    const items = resume.sections.skills.items.map((item: any, itemIndex: number) => {
+    const items = (resume.sections.skills?.items || []).map((item: any, itemIndex: number) => {
       if (itemIndex !== index) return item;
       return {
         ...item,
@@ -190,7 +190,7 @@ export const ResumeEditor = () => {
   const addSkillCategory = () => {
     if (!resume) return;
     const items = [
-      ...resume.sections.skills.items,
+      ...(resume.sections.skills?.items || []),
       {
         id:
           typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -206,7 +206,7 @@ export const ResumeEditor = () => {
 
   const removeSkillCategory = (index: number) => {
     if (!resume) return;
-    const items = resume.sections.skills.items.filter((_: any, itemIndex: number) =>
+    const items = (resume.sections.skills?.items || []).filter((_: any, itemIndex: number) =>
       itemIndex !== index
     );
     updateSection('skills', { items });
@@ -214,7 +214,7 @@ export const ResumeEditor = () => {
 
   const handleProjectChange = (index: number, field: string, value: string) => {
     if (!resume) return;
-    const items = resume.sections.projects.items.map((item: any, itemIndex: number) =>
+    const items = (resume.sections.projects?.items || []).map((item: any, itemIndex: number) =>
       itemIndex === index
         ? { ...item, [field]: field === 'description' ? sanitizeRichText(value) : value }
         : item
@@ -225,7 +225,7 @@ export const ResumeEditor = () => {
   const addProject = () => {
     if (!resume) return;
     const items = [
-      ...resume.sections.projects.items,
+      ...(resume.sections.projects?.items || []),
       {
         id:
           typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -244,7 +244,7 @@ export const ResumeEditor = () => {
 
   const removeProject = (index: number) => {
     if (!resume) return;
-    const items = resume.sections.projects.items.filter((_: any, itemIndex: number) =>
+    const items = (resume.sections.projects?.items || []).filter((_: any, itemIndex: number) =>
       itemIndex !== index
     );
     updateSection('projects', { items });
@@ -252,7 +252,7 @@ export const ResumeEditor = () => {
 
   const handleEducationChange = (index: number, field: string, value: string) => {
     if (!resume) return;
-    const items = resume.sections.education.items.map((item: any, itemIndex: number) =>
+    const items = (resume.sections.education?.items || []).map((item: any, itemIndex: number) =>
       itemIndex === index ? { ...item, [field]: value } : item
     );
     updateSection('education', { items });
@@ -261,7 +261,7 @@ export const ResumeEditor = () => {
   const addEducationItem = () => {
     if (!resume) return;
     const items = [
-      ...resume.sections.education.items,
+      ...(resume.sections.education?.items || []),
       {
         id:
           typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -281,7 +281,7 @@ export const ResumeEditor = () => {
 
   const removeEducationItem = (index: number) => {
     if (!resume) return;
-    const items = resume.sections.education.items.filter((_: any, itemIndex: number) =>
+    const items = (resume.sections.education?.items || []).filter((_: any, itemIndex: number) =>
       itemIndex !== index
     );
     updateSection('education', { items });
@@ -289,7 +289,7 @@ export const ResumeEditor = () => {
 
   const handleCertificationChange = (index: number, value: string) => {
     if (!resume) return;
-    const items = resume.sections.certifications.items.map((item: any, itemIndex: number) =>
+    const items = (resume.sections.certifications?.items || []).map((item: any, itemIndex: number) =>
       itemIndex === index ? { ...item, name: value } : item
     );
     updateSection('certifications', { items });
@@ -298,7 +298,7 @@ export const ResumeEditor = () => {
   const addCertificationItem = () => {
     if (!resume) return;
     const items = [
-      ...resume.sections.certifications.items,
+      ...(resume.sections.certifications?.items || []),
       {
         id:
           typeof crypto !== 'undefined' && 'randomUUID' in crypto
@@ -313,7 +313,7 @@ export const ResumeEditor = () => {
 
   const removeCertificationItem = (index: number) => {
     if (!resume) return;
-    const items = resume.sections.certifications.items.filter((_: any, itemIndex: number) =>
+    const items = (resume.sections.certifications?.items || []).filter((_: any, itemIndex: number) =>
       itemIndex !== index
     );
     updateSection('certifications', { items });
@@ -611,11 +611,11 @@ export const ResumeEditor = () => {
         <div className={`accordion-body ${expandedSection === 'experience' ? 'open' : ''}`}>
           <div>
             <div className="border-t border-slate-100 p-5 bg-white rounded-b-2xl space-y-4">
-            {resume.sections.experience.items.length === 0 ? (
+            {(resume.sections.experience?.items || []).length === 0 ? (
               <p className="text-center py-6 text-xs font-medium text-slate-400">No positions added. Click 'Add' above to start.</p>
             ) : (
               <div className="space-y-6">
-                {resume.sections.experience.items.map((item: any, index: number) => (
+                {(resume.sections.experience?.items || []).map((item: any, index: number) => (
                   <div
                     key={item.id}
                     draggable
@@ -634,7 +634,7 @@ export const ResumeEditor = () => {
                     }`}
                   >
                     <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-3 mb-4">
-                      <div className="flex items-center gap-2">
+                       <div className="flex items-center gap-2">
                         <div
                           className="w-6 h-6 flex items-center justify-center text-slate-400 hover:text-slate-700 cursor-grab active:cursor-grabbing transition-colors"
                           title="Drag to Reorder"
@@ -661,7 +661,7 @@ export const ResumeEditor = () => {
                           type="button"
                           className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white disabled:hover:text-slate-500 transition-all duration-200"
                           onClick={() => moveItem('experience', index, 'down')}
-                          disabled={index === resume.sections.experience.items.length - 1}
+                          disabled={index === (resume.sections.experience?.items || []).length - 1}
                           title="Move Down"
                         >
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -822,7 +822,7 @@ export const ResumeEditor = () => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>,
-              `${resume.sections.skills.items.length} categories`
+              `${(resume.sections.skills?.items || []).length} categories`
             )}
           </div>
           {expandedSection === 'skills' && (
@@ -841,11 +841,11 @@ export const ResumeEditor = () => {
         <div className={`accordion-body ${expandedSection === 'skills' ? 'open' : ''}`}>
           <div>
             <div className="border-t border-slate-100 p-5 bg-white rounded-b-2xl space-y-4">
-            {resume.sections.skills.items.length === 0 ? (
+            {(resume.sections.skills?.items || []).length === 0 ? (
               <p className="text-center py-6 text-xs font-medium text-slate-400">No skill categories. Click 'Add' above to build a list.</p>
             ) : (
               <div className="space-y-4">
-                {resume.sections.skills.items.map((item: any, index: number) => (
+                {(resume.sections.skills?.items || []).map((item: any, index: number) => (
                   <div
                     key={item.id}
                     draggable
@@ -890,7 +890,7 @@ export const ResumeEditor = () => {
                           type="button"
                           className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white disabled:hover:text-slate-500 transition-all duration-200"
                           onClick={() => moveItem('skills', index, 'down')}
-                          disabled={index === resume.sections.skills.items.length - 1}
+                          disabled={index === (resume.sections.skills?.items || []).length - 1}
                         >
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
@@ -952,7 +952,7 @@ export const ResumeEditor = () => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" />
               </svg>,
-              `${resume.sections.projects.items.length} projects`
+              `${(resume.sections.projects?.items || []).length} projects`
             )}
           </div>
           {expandedSection === 'projects' && (
@@ -971,11 +971,11 @@ export const ResumeEditor = () => {
         <div className={`accordion-body ${expandedSection === 'projects' ? 'open' : ''}`}>
           <div>
             <div className="border-t border-slate-100 p-5 bg-white rounded-b-2xl space-y-4">
-            {resume.sections.projects.items.length === 0 ? (
+            {(resume.sections.projects?.items || []).length === 0 ? (
               <p className="text-center py-6 text-xs font-medium text-slate-400">No projects added. Click 'Add' to showcase your projects.</p>
             ) : (
               <div className="space-y-6">
-                {resume.sections.projects.items.map((item: any, index: number) => (
+                {(resume.sections.projects?.items || []).map((item: any, index: number) => (
                   <div
                     key={item.id}
                     draggable
@@ -1020,7 +1020,7 @@ export const ResumeEditor = () => {
                           type="button"
                           className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white disabled:hover:text-slate-500 transition-all duration-200"
                           onClick={() => moveItem('projects', index, 'down')}
-                          disabled={index === resume.sections.projects.items.length - 1}
+                          disabled={index === (resume.sections.projects?.items || []).length - 1}
                         >
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
@@ -1133,7 +1133,7 @@ export const ResumeEditor = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 14v7" />
               </svg>,
-              `${resume.sections.education.items.length} records`
+              `${(resume.sections.education?.items || []).length} records`
             )}
           </div>
           {expandedSection === 'education' && (
@@ -1152,11 +1152,11 @@ export const ResumeEditor = () => {
         <div className={`accordion-body ${expandedSection === 'education' ? 'open' : ''}`}>
           <div>
             <div className="border-t border-slate-100 p-5 bg-white rounded-b-2xl space-y-4">
-            {resume.sections.education.items.length === 0 ? (
+            {(resume.sections.education?.items || []).length === 0 ? (
               <p className="text-center py-6 text-xs font-medium text-slate-400">No education entries. Click 'Add' to specify degrees.</p>
             ) : (
               <div className="space-y-6">
-                {resume.sections.education.items.map((item: any, index: number) => (
+                {(resume.sections.education?.items || []).map((item: any, index: number) => (
                   <div
                     key={item.id}
                     draggable
@@ -1201,7 +1201,7 @@ export const ResumeEditor = () => {
                           type="button"
                           className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white disabled:hover:text-slate-500 transition-all duration-200"
                           onClick={() => moveItem('education', index, 'down')}
-                          disabled={index === resume.sections.education.items.length - 1}
+                          disabled={index === (resume.sections.education?.items || []).length - 1}
                         >
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
@@ -1302,7 +1302,7 @@ export const ResumeEditor = () => {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
               </svg>,
-              `${resume.sections.certifications.items.length} active`
+              `${(resume.sections.certifications?.items || []).length} active`
             )}
           </div>
           {expandedSection === 'certifications' && (
@@ -1321,11 +1321,11 @@ export const ResumeEditor = () => {
         <div className={`accordion-body ${expandedSection === 'certifications' ? 'open' : ''}`}>
           <div>
             <div className="border-t border-slate-100 p-5 bg-white rounded-b-2xl space-y-4">
-            {resume.sections.certifications.items.length === 0 ? (
+            {(resume.sections.certifications?.items || []).length === 0 ? (
               <p className="text-center py-6 text-xs font-medium text-slate-400">No certifications. Click 'Add' to document certifications.</p>
             ) : (
               <div className="space-y-4">
-                {resume.sections.certifications.items.map((item: any, index: number) => (
+                {(resume.sections.certifications?.items || []).map((item: any, index: number) => (
                   <div
                     key={item.id}
                     draggable
@@ -1370,7 +1370,7 @@ export const ResumeEditor = () => {
                           type="button"
                           className="w-7 h-7 flex items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-slate-800 hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white disabled:hover:text-slate-500 transition-all duration-200"
                           onClick={() => moveItem('certifications', index, 'down')}
-                          disabled={index === resume.sections.certifications.items.length - 1}
+                          disabled={index === (resume.sections.certifications?.items || []).length - 1}
                         >
                           <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />

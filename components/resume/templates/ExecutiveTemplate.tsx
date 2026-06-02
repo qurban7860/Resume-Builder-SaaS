@@ -133,12 +133,12 @@ export const ExecutiveTemplate = React.memo(({ resume }: { resume: Resume }) => 
             </section>
           );
         }
-        if (secId === 'education' && sections.education.items.length > 0) {
+        if (secId === 'education' && (sections.education?.items?.length ?? 0) > 0) {
           return (
             <section key={secId} className="mb-2">
               <SectionTitle>Education</SectionTitle>
               <div className="space-y-1.5">
-                {sections.education.items.map((item: any, idx: number) => {
+                {(sections.education?.items || []).map((item: any, idx: number) => {
                   const courseText = item.coursework || (idx === 0 ? courseNames : '');
                   return (
                     <div key={item.id} className="break-inside-avoid mb-1">
@@ -162,27 +162,27 @@ export const ExecutiveTemplate = React.memo(({ resume }: { resume: Resume }) => 
             </section>
           );
         }
-        if (secId === 'skills' && sections.skills.items.length > 0) {
+        if (secId === 'skills' && (sections.skills?.items?.length ?? 0) > 0) {
           return (
             <section key={secId} className="mb-2.5">
               <SectionTitle>Skills</SectionTitle>
               <div className="space-y-0.5">
-                {sections.skills.items.map((skill: any) => (
+                {(sections.skills?.items || []).map((skill: any) => (
                   <div key={skill.id} className="break-inside-avoid" style={{ fontSize: '10.5px', color: '#374151', lineHeight: '1.45' }}>
                     <span style={{ fontWeight: 700, color: DARK }}>{skill.name}: </span>
-                    <span>{skill.keywords.join(', ')}</span>
+                    <span>{(skill.keywords || []).join(', ')}</span>
                   </div>
                 ))}
               </div>
             </section>
           );
         }
-        if (secId === 'experience' && sections.experience.items.length > 0) {
+        if (secId === 'experience' && (sections.experience?.items?.length ?? 0) > 0) {
           return (
             <section key={secId} className="mb-2">
               <SectionTitle>Experience</SectionTitle>
               <div className="space-y-2">
-                {sections.experience.items.map((item: any) => (
+                {(sections.experience?.items || []).map((item: any) => (
                   <div key={item.id} className="break-inside-avoid mb-2">
                     <div className="flex justify-between items-baseline">
                       <div style={{ fontSize: '11.5px', lineHeight: '1.3' }}>
@@ -207,12 +207,12 @@ export const ExecutiveTemplate = React.memo(({ resume }: { resume: Resume }) => 
             </section>
           );
         }
-        if (secId === 'projects' && sections.projects.items.length > 0) {
+        if (secId === 'projects' && (sections.projects?.items?.length ?? 0) > 0) {
           return (
             <section key={secId} className="mb-2">
               <SectionTitle>Projects</SectionTitle>
               <div className="space-y-2">
-                {sections.projects.items.map((proj: any) => {
+                {(sections.projects?.items || []).map((proj: any) => {
                   const primaryUrl = proj.projectUrl || proj.githubUrl;
                   return (
                     <div key={proj.id} className="break-inside-avoid mb-2">
