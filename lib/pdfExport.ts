@@ -11,31 +11,51 @@ export async function exportResumeToPDF(_resume: any, filename: string, _templat
     // 2) Clone it to ensure perfect fidelity
     const wrapper = previewElement.cloneNode(true) as HTMLElement;
     
-    const scaledContainer = wrapper.firstElementChild as HTMLElement;
-    if (scaledContainer) {
-      scaledContainer.style.transform = 'none';
-      scaledContainer.style.transformOrigin = 'unset';
-      scaledContainer.style.transition = 'none';
-      scaledContainer.style.width = '794px';
-      scaledContainer.style.margin = '0';
-    }
+    // Reset transform scale on any elements so it renders at 100% scale (794px width)
+    const allElements = wrapper.querySelectorAll('*');
+    allElements.forEach((el: any) => {
+      if (el.style && el.style.transform && el.style.transform.includes('scale')) {
+        el.style.transform = 'none';
+        el.style.transformOrigin = 'unset';
+        el.style.transition = 'none';
+      }
+      // Reset shadows, margins, and roundings for print mode
+      if (el.classList && (el.classList.contains('shadow-lg') || el.classList.contains('rounded-lg') || el.classList.contains('p-8'))) {
+        el.style.boxShadow = 'none';
+        el.style.borderRadius = '0';
+        el.style.padding = '0';
+        el.style.margin = '0';
+        el.style.minHeight = 'auto';
+      }
+    });
 
-    const rendererContainer = scaledContainer?.firstElementChild as HTMLElement;
-    if (rendererContainer) {
-      rendererContainer.className = 'bg-white w-full';
-      rendererContainer.style.boxShadow = 'none';
-      rendererContainer.style.borderRadius = '0';
-      rendererContainer.style.margin = '0';
-      rendererContainer.style.padding = '0'; // let options.margin handle page boundaries
-      rendererContainer.style.minHeight = 'auto';
+    // Make sure the wrapper itself and its immediate children have correct full width
+    wrapper.style.width = '794px';
+    wrapper.style.margin = '0';
+    wrapper.style.padding = '0';
+    if (wrapper.firstElementChild) {
+      (wrapper.firstElementChild as HTMLElement).style.width = '794px';
+      (wrapper.firstElementChild as HTMLElement).style.margin = '0';
+      if (wrapper.firstElementChild.firstElementChild) {
+        (wrapper.firstElementChild.firstElementChild as HTMLElement).className = 'bg-white w-full';
+        (wrapper.firstElementChild.firstElementChild as HTMLElement).style.boxShadow = 'none';
+        (wrapper.firstElementChild.firstElementChild as HTMLElement).style.borderRadius = '0';
+        (wrapper.firstElementChild.firstElementChild as HTMLElement).style.margin = '0';
+        (wrapper.firstElementChild.firstElementChild as HTMLElement).style.padding = '0';
+        (wrapper.firstElementChild.firstElementChild as HTMLElement).style.minHeight = 'auto';
+      }
     }
     
-    // 3) Create an off-screen container for the clone
+    // 3) Create a visible but hidden (behind the page) container inside the viewport
+    // This ensures html2canvas renders the layout and text correctly
     const container = document.createElement('div');
-    container.style.position = 'absolute';
-    container.style.top = '-9999px';
-    container.style.left = '-9999px';
-    container.style.width = '210mm'; // Standard A4 width (793.7px at 96 DPI)
+    container.style.position = 'fixed';
+    container.style.top = '0';
+    container.style.left = '0';
+    container.style.zIndex = '-9999';
+    container.style.opacity = '1';
+    container.style.pointerEvents = 'none';
+    container.style.width = '794px';
     container.style.backgroundColor = '#ffffff';
     
     container.appendChild(wrapper);
