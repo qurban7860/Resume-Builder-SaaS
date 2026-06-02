@@ -81,6 +81,17 @@ export const VercelTemplate = React.memo(({ resume }: ResumeProps) => {
           </section>
         )}
 
+        {(sections.keyAchievements?.items?.length ?? 0) > 0 && (
+          <section className="space-y-2">
+            <div className="text-[10px] uppercase tracking-[0.24em] text-slate-400">Key Achievements</div>
+            <ul className="text-[10.5px] leading-[1.45] text-slate-700 pl-4 list-disc space-y-1">
+              {(sections.keyAchievements?.items || []).map((item: any) => (
+                <li key={item.id} className="break-inside-avoid">{item.content}</li>
+              ))}
+            </ul>
+          </section>
+        )}
+
         <div className="grid gap-4">
           {sections.experience?.items?.length > 0 && (
             <section className="space-y-2">

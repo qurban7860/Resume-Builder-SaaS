@@ -25,6 +25,7 @@ interface Resume {
     certifications: { items: Array<any> };
     relevantCoursework: { items: Array<any> };
     achievements: { items: Array<any> };
+    keyAchievements?: { items: Array<any> };
   };
 }
 

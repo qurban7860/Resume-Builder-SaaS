@@ -53,6 +53,7 @@ interface Resume {
     skills: { items: any[] };
     certifications?: { items: any[] };
     achievements?: { items: any[] };
+    keyAchievements?: { items: any[] };
     relevantCoursework?: { items: any[] };
   };
 }
@@ -99,6 +100,18 @@ export const ClassicTemplate = React.memo(({ resume }: { resume: Resume }) => {
         <section className="mb-2">
           <SectionTitle>Summary</SectionTitle>
           {renderHtml(sections.summary.content, 'text-[10.5px] text-gray-800 leading-[1.45]')}
+        </section>
+      )}
+
+      {/* Key Achievements */}
+      {(sections.keyAchievements?.items?.length ?? 0) > 0 && (
+        <section className="mb-2">
+          <SectionTitle>Key Achievements</SectionTitle>
+          <ul className="text-[10.5px] text-gray-800 leading-[1.45] pl-4 list-disc space-y-1">
+            {(sections.keyAchievements?.items || []).map((item: any) => (
+              <li key={item.id} className="break-inside-avoid">{item.content}</li>
+            ))}
+          </ul>
         </section>
       )}
 
@@ -205,7 +218,7 @@ export const ClassicTemplate = React.memo(({ resume }: { resume: Resume }) => {
       {/* Certificates & Awards */}
       {((sections.achievements?.items?.length ?? 0) > 0 || (sections.certifications?.items?.length ?? 0) > 0) && (
         <section className="mb-2">
-          <SectionTitle>Certificates & Awards</SectionTitle>
+          <SectionTitle>Certifications</SectionTitle>
           <ul className="text-[10.5px] text-gray-800 list-disc pl-4 space-y-[2px] leading-[1.4]">
             {(sections.achievements?.items || []).map((ach: any) => {
               const parts = [ach.title];

@@ -1,6 +1,4 @@
-import { renderResumeHTML } from '@/lib/pdfTemplate';
-
-export async function exportResumeToPDF(resume: any, filename: string, templateId: string = 'classic') {
+export async function exportResumeToPDF(_resume: any, filename: string, _templateId: string = 'classic') {
   try {
     const { default: html2pdf } = await import('html2pdf.js');
 

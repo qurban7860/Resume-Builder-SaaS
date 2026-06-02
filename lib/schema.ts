@@ -57,6 +57,10 @@ const SectionsSchema = z.object({
   projects: z.object({ items: z.array(ProjectItemSchema) }),
   skills: z.object({ items: z.array(SkillItemSchema) }),
   certifications: z.object({ items: z.array(CertificationItemSchema) }),
+  keyAchievements: z.object({ items: z.array(z.object({
+    id: z.string().uuid(),
+    content: z.string()
+  })) }).optional(),
 });
 
 export const ResumeSchema = z.object({

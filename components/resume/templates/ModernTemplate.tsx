@@ -46,7 +46,7 @@ const renderHtml = (value: string, className: string) => (
 
 interface Resume {
   basics: { name: string; headline?: string; email: string; phone: string; location: string; url?: { href: string }; linkedin?: string; github?: string };
-  sections: { summary?: { content: string }; experience: { items: any[] }; education: { items: any[] }; projects: { items: any[] }; skills: { items: any[] }; certifications?: { items: any[] }; achievements?: { items: any[] }; relevantCoursework?: { items: any[] } };
+  sections: { summary?: { content: string }; experience: { items: any[] }; education: { items: any[] }; projects: { items: any[] }; skills: { items: any[] }; certifications?: { items: any[] }; achievements?: { items: any[] }; keyAchievements?: { items: any[] }; relevantCoursework?: { items: any[] }; };
 }
 
 export const ModernTemplate = React.memo(({ resume }: { resume: Resume }) => {
@@ -97,6 +97,18 @@ export const ModernTemplate = React.memo(({ resume }: { resume: Resume }) => {
         <section className="mb-2">
           <SectionTitle>Summary</SectionTitle>
           {renderHtml(sections.summary.content, 'text-[10.5px] text-[#374151] leading-[1.5]')}
+        </section>
+      )}
+
+      {/* ── Key Achievements ── */}
+      {(sections.keyAchievements?.items?.length ?? 0) > 0 && (
+        <section className="mb-2">
+          <SectionTitle>Key Achievements</SectionTitle>
+          <ul style={{ fontSize: '10.5px', color: '#374151', lineHeight: '1.45', paddingLeft: '16px', listStyleType: 'disc' }}>
+            {(sections.keyAchievements?.items || []).map((item: any) => (
+              <li key={item.id} className="break-inside-avoid" style={{ marginBottom: '2px' }}>{item.content}</li>
+            ))}
+          </ul>
         </section>
       )}
 
@@ -205,7 +217,7 @@ export const ModernTemplate = React.memo(({ resume }: { resume: Resume }) => {
       {/* ── Certificates & Awards ── */}
       {((sections.achievements?.items?.length ?? 0) > 0 || (sections.certifications?.items?.length ?? 0) > 0) && (
         <section className="mb-2">
-          <SectionTitle>Certificates & Awards</SectionTitle>
+          <SectionTitle>Certifications</SectionTitle>
           <ul style={{ fontSize: '10.5px', color: '#374151', paddingLeft: '16px', listStyleType: 'disc', lineHeight: '1.45' }}>
             {(sections.achievements?.items || []).map((ach: any) => {
               const parts = [ach.title];
