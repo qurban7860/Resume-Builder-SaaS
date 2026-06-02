@@ -44,7 +44,7 @@ export async function exportResumeToPDF(_resume: any, filename: string, _templat
         width: 794,
         windowWidth: 794,
       },
-      jsPDF: { orientation: 'portrait', unit: 'mm', format: 'a4' },
+      jsPDF: { orientation: 'portrait', unit: 'px', format: [794, 1122] },
       pagebreak: { mode: ['css', 'legacy'] }
     };
 

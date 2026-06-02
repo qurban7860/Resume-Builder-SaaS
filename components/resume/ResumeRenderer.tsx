@@ -53,7 +53,7 @@ export const ResumeRenderer = React.memo(
     const templateProps = { resume };
 
     return (
-      <div className={containerClass} style={printMode ? { padding: '8mm 10mm', minHeight: '297mm' } : undefined}>
+      <div className={containerClass} style={printMode ? { padding: '8mm 10mm', minHeight: '296mm' } : undefined}>
         {templateId === 'modern'    && <ModernTemplate    {...templateProps} />}
         {templateId === 'executive' && <ExecutiveTemplate {...templateProps} />}
         {templateId === 'vercel'    && <VercelTemplate    {...templateProps} />}

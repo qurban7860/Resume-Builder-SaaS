@@ -582,7 +582,7 @@ export default function Dashboard() {
           </div>
 
           {/* Page-fit status banner */}
-          {contentHeightPx > A4_HEIGHT_PX + 20 ? (
+          {contentHeightPx > A4_HEIGHT_PX + 3 ? (
             <div className="w-full max-w-[210mm] rounded-2xl border border-amber-200 bg-amber-50 text-amber-900 px-4 py-3 text-sm font-semibold shadow-sm">
               📄 Resume spans <strong>{Math.ceil(contentHeightPx / A4_HEIGHT_PX)} pages</strong> — page break shown below. PDF export will auto-paginate.
             </div>
@@ -604,7 +604,7 @@ export default function Dashboard() {
               }}
             >
               {/* ── Page break ruler at exactly 297mm * zoom ── */}
-              {contentHeightPx > A4_HEIGHT_PX + 20 && (
+              {contentHeightPx > A4_HEIGHT_PX + 3 && (
                 <div
                   className="absolute left-0 right-0 z-20 pointer-events-none"
                   style={{ top: `${A4_HEIGHT_PX * zoom}px` }}
