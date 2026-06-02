@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.0",
+    "@sparticuz/chromium-min": "^147.0.0",
     "autoprefixer": "^10.4.0",
     "axios": "^1.6.0",
     "html2pdf.js": "^0.10.1",
@@ -18,6 +19,7 @@
     "next": "^14.0.0",
     "pdf-parse": "^2.4.5",
     "postcss": "^8.4.0",
+    "puppeteer-core": "^24.43.1",
     "quill": "^2.0.3",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",

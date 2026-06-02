@@ -11,12 +11,23 @@ export async function exportResumeToPDF(_resume: any, filename: string, _templat
     // 2) Clone it to ensure perfect fidelity
     const wrapper = previewElement.cloneNode(true) as HTMLElement;
     
-    // We remove the inner padding on the clone so html2pdf can apply it as page margins
-    // The first child is the ResumeRenderer root div which has the padding
-    const innerContainer = wrapper.firstElementChild as HTMLElement;
-    if (innerContainer) {
-      innerContainer.style.padding = '0';
-      innerContainer.style.minHeight = 'auto'; // let html2pdf calculate height natively
+    const scaledContainer = wrapper.firstElementChild as HTMLElement;
+    if (scaledContainer) {
+      scaledContainer.style.transform = 'none';
+      scaledContainer.style.transformOrigin = 'unset';
+      scaledContainer.style.transition = 'none';
+      scaledContainer.style.width = '794px';
+      scaledContainer.style.margin = '0';
+    }
+
+    const rendererContainer = scaledContainer?.firstElementChild as HTMLElement;
+    if (rendererContainer) {
+      rendererContainer.className = 'bg-white w-full';
+      rendererContainer.style.boxShadow = 'none';
+      rendererContainer.style.borderRadius = '0';
+      rendererContainer.style.margin = '0';
+      rendererContainer.style.padding = '0'; // let options.margin handle page boundaries
+      rendererContainer.style.minHeight = 'auto';
     }
     
     // 3) Create an off-screen container for the clone
