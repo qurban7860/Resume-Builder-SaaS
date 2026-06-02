@@ -36,7 +36,7 @@ export const LeadershipAwards = React.memo(({ achievements, certifications }: Le
   return (
     <section className="mb-4">
       <h2 className="text-[12px] font-bold uppercase tracking-wider text-gray-950 mb-1 border-b border-gray-950 pb-0.5 font-serif">
-        Leadership & Awards
+        Certificates & Awards
       </h2>
       <ul className="text-[10.5px] text-gray-800 list-disc pl-4 space-y-0.5 leading-[1.35] font-serif">
         {achievements.map((ach) => (

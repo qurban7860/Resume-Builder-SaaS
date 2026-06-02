@@ -67,7 +67,7 @@ export const ClassicTemplate = React.memo(({ resume }: { resume: Resume }) => {
     basics.email    && { icon: <EmailIcon />,    label: basics.email,    href: `mailto:${basics.email}` },
     basics.linkedin && { icon: <LinkedinIcon />, label: getLinkedinSlug(basics.linkedin), href: basics.linkedin },
     basics.github   && { icon: <GithubIcon />,   label: getGithubSlug(basics.github),    href: basics.github },
-    basics.url?.href && { icon: <WebsiteIcon />, label: getWebDisplay(basics.url.href),  href: basics.url.href },
+    basics.url?.href && { icon: <WebsiteIcon />, label: (basics.url as any)?.label || getWebDisplay(basics.url.href),  href: basics.url.href },
   ].filter(Boolean) as { icon: React.ReactNode; label: string; href?: string }[];
 
   return (
@@ -202,10 +202,10 @@ export const ClassicTemplate = React.memo(({ resume }: { resume: Resume }) => {
         </section>
       )}
 
-      {/* Leadership & Awards */}
+      {/* Certificates & Awards */}
       {((sections.achievements?.items?.length ?? 0) > 0 || (sections.certifications?.items?.length ?? 0) > 0) && (
         <section className="mb-2">
-          <SectionTitle>Leadership & Awards</SectionTitle>
+          <SectionTitle>Certificates & Awards</SectionTitle>
           <ul className="text-[10.5px] text-gray-800 list-disc pl-4 space-y-[2px] leading-[1.4]">
             {(sections.achievements?.items || []).map((ach: any) => {
               const parts = [ach.title];

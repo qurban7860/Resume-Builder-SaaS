@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useResumeStore } from '@/store/useResumeStore';
 import { useTemplateStore } from '@/store/useTemplateStore';
 import { ResumeRenderer } from '@/components/resume/ResumeRenderer';
@@ -26,6 +26,8 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
   const [zoom, setZoom] = useState(1.0);
+  const previewPageRef = useRef<HTMLDivElement | null>(null);
+  const [pageOverflow, setPageOverflow] = useState(false);
   const [mobileTab, setMobileTab] = useState<'editor' | 'preview'>('editor');
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [showHeatmap, setShowHeatmap] = useState(false);
@@ -33,7 +35,10 @@ export default function Dashboard() {
   useEffect(() => {
     // Load initial resume data
     if (!resume) {
-      setResume(resumeData as any);
+      const hasSaved = typeof window !== 'undefined' && !!localStorage.getItem('resume-store');
+      if (!hasSaved) {
+        setResume(resumeData as any);
+      }
     }
     setLoading(false);
   }, [resume, setResume]);
@@ -78,6 +83,25 @@ export default function Dashboard() {
       };
     }
   }, [loading]);
+
+  useEffect(() => {
+    if (!previewPageRef.current) {
+      return;
+    }
+
+    const updateOverflow = () => {
+      const page = previewPageRef.current;
+      if (!page) return;
+      setPageOverflow(page.scrollHeight > page.clientHeight + 1);
+    };
+
+    updateOverflow();
+
+    const observer = new ResizeObserver(() => updateOverflow());
+    observer.observe(previewPageRef.current);
+
+    return () => observer.disconnect();
+  }, [resume, templateId, zoom]);
 
   useEffect(() => {
     // Update score whenever resume changes
@@ -136,7 +160,8 @@ export default function Dashboard() {
     try {
       setIsExporting(true);
       if (!resume) return;
-      const filename = `${resume.basics.name.replace(/\s+/g, '-')}-resume.pdf`;
+      const safeName = (resume.basics?.name || 'resume').toString().trim() || 'resume';
+      const filename = `${safeName.replace(/\s+/g, '-')}-resume.pdf`;
 
       const response = await fetch('/api/resume/pdf', {
         method: 'POST',
@@ -162,7 +187,8 @@ export default function Dashboard() {
       console.warn('Server PDF export failed; falling back to client-side PDF export.', error);
       try {
         if (!resume) return;
-        await exportResumeToPDF(resume, `${resume.basics.name.replace(/\s+/g, '-')}-resume.pdf`, templateId);
+        const safeName2 = (resume.basics?.name || 'resume').toString().trim() || 'resume';
+        await exportResumeToPDF(resume, `${safeName2.replace(/\s+/g, '-')}-resume.pdf`, templateId);
       } catch (fallbackError) {
         console.error('Client-side PDF fallback failed:', fallbackError);
         alert('Failed to export PDF. Please try again.');
@@ -555,6 +581,16 @@ export default function Dashboard() {
             </div>
           </div>
 
+          {pageOverflow ? (
+            <div className="w-full max-w-[210mm] rounded-2xl border border-amber-200 bg-amber-50 text-amber-900 px-4 py-3 text-sm font-semibold shadow-sm">
+              ⚠️ This resume content exceeds one A4 page. Remove or shorten text so the PDF export stays on a single page.
+            </div>
+          ) : (
+            <div className="w-full max-w-[210mm] rounded-2xl border border-slate-200 bg-white/80 text-slate-500 px-4 py-3 text-sm font-medium shadow-sm">
+              ✅ Fits a single A4 page in live preview.
+            </div>
+          )}
+
           {/* Centered Premium Shadow-A4 Preview Box */}
           <div className="w-full flex justify-center items-start overflow-visible py-2" style={{ minHeight: `calc(297mm * ${zoom})` }}>
             <div 
@@ -567,6 +603,7 @@ export default function Dashboard() {
               className="flex-shrink-0 select-none"
             >
               <div 
+                ref={previewPageRef}
                 style={{ 
                   transform: `scale(${zoom})`, 
                   transformOrigin: 'top left',

@@ -50,8 +50,8 @@ export const pageStyle = `
   }
 
   @page {
-    size: A4;
-    margin: 8mm 10mm 8mm 10mm;
+    size: A4 portrait;
+    margin: 8mm;
   }
 
   html, body {
@@ -61,14 +61,20 @@ export const pageStyle = `
     color: #111111;
     font-family: Georgia, "Times New Roman", Times, serif;
     -webkit-font-smoothing: antialiased;
+    width: 210mm;
+    min-height: 297mm;
+    font-size: 10.5px;
+    line-height: 1.35;
   }
 
   body {
     padding: 0;
+    margin: 0;
   }
 
   .resume-container {
-    width: 100%;
+    width: 210mm;
+    max-width: 210mm;
     margin: 0 auto;
     background: #ffffff;
     padding: 0;
@@ -76,12 +82,12 @@ export const pageStyle = `
 
   .header {
     text-align: center;
-    margin-bottom: 10px;
-    padding-bottom: 0px;
+    margin-bottom: 8px;
+    padding-bottom: 0;
   }
 
   .header h1 {
-    font-size: 26px;
+    font-size: 24px;
     font-weight: 700;
     margin: 0 0 3px;
     color: #111111;
@@ -89,23 +95,23 @@ export const pageStyle = `
   }
 
   .header .headline {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: #4b5563;
-    margin: 0 0 6px;
+    margin: 0 0 4px;
   }
 
   .header .contact-row {
     margin: 0;
     color: #111111;
-    font-size: 10.5px;
+    font-size: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 8px;
   }
 
   .header .contact-row a {
@@ -120,32 +126,75 @@ export const pageStyle = `
   }
 
   .section-title {
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: #111111;
-    margin-top: 14px;
-    margin-bottom: 5px;
-    padding-bottom: 2px;
+    margin-top: 12px;
+    margin-bottom: 4px;
+    padding-bottom: 1px;
     border-bottom: 1px solid #111111;
   }
 
   .section-block {
-    margin-bottom: 7px;
+    margin-bottom: 6px;
+    /* Allow sections to break across pages to avoid large empty gaps
+       when a whole section doesn't fit on the current page. */
+    page-break-inside: auto;
+    break-inside: auto;
+    /* Keep at least two lines together to avoid single-line orphans/widows */
+    orphans: 2;
+    widows: 2;
+  }
+
+  /* Keep section titles from being split, but allow the following block to
+     break if it doesn't fully fit — this reduces large blank areas. */
+  .section-title {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    /* Prefer to keep the title with the following content, but don't force
+       the entire section to the next page if only part fits. */
+    page-break-after: avoid;
+  }
+
+  /* Allow content blocks (the section body) to break across pages. */
+  .section-title + .section-block {
+    page-break-inside: auto;
+    break-inside: auto;
+  }
+
+  /* Let lists break naturally across pages while avoiding splitting an
+     individual list item into two pages. */
+  ul, ol {
+    page-break-inside: auto;
+    break-inside: auto;
+  }
+
+  li {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .summary-content {
+    font-size: 10.5px;
+    line-height: 1.35;
+    color: #222222;
+    margin: 0;
   }
 
   .item-row {
     display: flex;
     justify-content: space-between;
     align-items: baseline;
+    gap: 12px;
     margin-bottom: 2px;
   }
 
   .item-left {
-    font-size: 12px;
+    font-size: 11px;
     color: #111111;
-    line-height: 1.4;
+    line-height: 1.35;
   }
 
   .item-left .bold {
@@ -157,17 +206,17 @@ export const pageStyle = `
   }
 
   .item-right {
-    font-size: 11.5px;
+    font-size: 10.75px;
     font-weight: 700;
     color: #111111;
     white-space: nowrap;
   }
 
   .skills-row {
-    font-size: 11px;
-    line-height: 1.5;
+    font-size: 10.5px;
+    line-height: 1.45;
     color: #222222;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
   }
 
   .skills-row .bold {
@@ -176,16 +225,16 @@ export const pageStyle = `
   }
 
   ul {
-    margin: 4px 0 0 16px;
+    margin: 4px 0 0 14px;
     padding: 0;
     list-style-type: disc;
   }
 
   li {
-    font-size: 11px;
-    line-height: 1.5;
+    font-size: 10.5px;
+    line-height: 1.45;
     color: #222222;
-    margin-bottom: 2.5px;
+    margin-bottom: 2px;
     display: list-item;
   }
 
@@ -221,6 +270,7 @@ export const pageStyle = `
       padding: 0 !important;
       max-width: 100% !important;
       width: 100% !important;
+      page-break-after: avoid;
     }
   }
 `;
@@ -264,7 +314,8 @@ function renderResumeBodyHTML(resume: any) {
     contactParts.push(`<a href="${escapeHtml(basics.github)}" target="_blank" style="display: inline-flex; align-items: center;">${githubSvg}<span>${escapeHtml(getGithubDisplay(basics.github))}</span></a>`);
   }
   if (basics.url?.href) {
-    contactParts.push(`<a href="${escapeHtml(basics.url.href)}" target="_blank" style="display: inline-flex; align-items: center;">${websiteSvg}<span>${escapeHtml(getWebsiteDisplay(basics.url.href))}</span></a>`);
+    const siteLabel = (basics.url as any)?.label || getWebsiteDisplay(basics.url.href);
+    contactParts.push(`<a href="${escapeHtml(basics.url.href)}" target="_blank" style="display: inline-flex; align-items: center;">${websiteSvg}<span>${escapeHtml(siteLabel)}</span></a>`);
   }
   const contactRowHTML = contactParts.join(' <span style="color: #9ca3af; margin: 0 2px;">|</span> ');
 
@@ -360,7 +411,7 @@ function renderResumeBodyHTML(resume: any) {
     })
     .join('');
 
-  // Render combined Leadership & Awards
+  // Render combined Certificates & Awards
   const certificationsItems = (sections.certifications?.items || []);
   const achievementsItems = (sections.achievements?.items || []);
   
@@ -379,7 +430,7 @@ function renderResumeBodyHTML(resume: any) {
   const leadershipHTML = (certificationsItems.length > 0 || achievementsItems.length > 0)
     ? `
       <div class="section-block">
-        <div class="section-title">Leadership & Awards</div>
+        <div class="section-title">Certificates & Awards</div>
         <ul>
           ${achievementsItems.map((ach: any) => `<li>${escapeHtml(getAchievementText(ach))}</li>`).join('')}
           ${certificationsItems.map((cert: any) => `<li>${escapeHtml(cert.name)}</li>`).join('')}
@@ -398,7 +449,7 @@ function renderResumeBodyHTML(resume: any) {
     ${summaryHTML ? `
     <div class="section-block">
       <div class="section-title">Summary</div>
-      <p style="font-size: 11px; line-height: 1.5; color: #222222; margin: 0;">${summaryHTML.replace(/\n/g, '<br/>')}</p>
+      <div class="summary-content">${summaryHTML}</div>
     </div>
     ` : ''}
 
@@ -582,7 +633,7 @@ export function renderResumeHTML(resume: any, templateId: string = 'classic') {
     if (basics.email)    contactParts.push(`<a href="mailto:${escapeHtml(basics.email)}" style="display:inline-flex;align-items:center;">${emailSvg}<span>${escapeHtml(basics.email)}</span></a>`);
     if (basics.linkedin) contactParts.push(`<a href="${escapeHtml(basics.linkedin)}" style="display:inline-flex;align-items:center;color:#4f46e5;">${linkedinSvg}<span>${escapeHtml(getLinkedinDisplay(basics.linkedin))}</span></a>`);
     if (basics.github)   contactParts.push(`<a href="${escapeHtml(basics.github)}" style="display:inline-flex;align-items:center;color:#4f46e5;">${githubSvg}<span>${escapeHtml(getGithubDisplay(basics.github))}</span></a>`);
-    if (basics.url?.href) contactParts.push(`<a href="${escapeHtml(basics.url.href)}" style="display:inline-flex;align-items:center;color:#4f46e5;">${websiteSvg}<span>${escapeHtml(getWebsiteDisplay(basics.url.href))}</span></a>`);
+    if (basics.url?.href) contactParts.push(`<a href="${escapeHtml(basics.url.href)}" style="display:inline-flex;align-items:center;color:#4f46e5;">${websiteSvg}<span>${escapeHtml((basics.url as any)?.label || getWebsiteDisplay(basics.url.href))}</span></a>`);
     const contactRowHTML = contactParts.join(' <span style="color:#cbd5e1;margin:0 2px;">|</span> ');
     headerHTML = `
       <div class="header">

@@ -47,7 +47,7 @@ const getContactItems = (basics: any) => [
   basics.email && { icon: '✉️', label: basics.email, href: `mailto:${basics.email}` },
   basics.linkedin && { icon: 'in', label: getLinkedinSlug(basics.linkedin), href: basics.linkedin },
   basics.github && { icon: 'GH', label: getGithubSlug(basics.github), href: basics.github },
-  basics.url?.href && { icon: '🌐', label: getWebDisplay(basics.url.href), href: basics.url.href },
+  basics.url?.href && { icon: '🌐', label: (basics.url as any)?.label || getWebDisplay(basics.url.href), href: basics.url.href },
 ].filter(Boolean) as Array<{ icon: string; label: string; href?: string }>;
 
 interface ResumeProps {

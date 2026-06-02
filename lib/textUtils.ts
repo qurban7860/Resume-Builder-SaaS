@@ -1,6 +1,4 @@
-import createDOMPurify from 'isomorphic-dompurify';
-
-const DOMPurify = createDOMPurify();
+import DOMPurify from 'isomorphic-dompurify';
 
 export function stripHtmlTags(value = '') {
   return value
@@ -17,6 +15,9 @@ export function normalizePlainText(value = '') {
 }
 
 export function sanitizeRichText(value = '') {
+  if (typeof DOMPurify.sanitize !== 'function') {
+    return stripHtmlTags(value);
+  }
   return DOMPurify.sanitize(value, {
     ALLOWED_TAGS: ['b', 'strong', 'i', 'em', 'u', 'p', 'br', 'ul', 'ol', 'li', 'a', 'span'],
     ALLOWED_ATTR: ['href', 'target', 'rel'],
