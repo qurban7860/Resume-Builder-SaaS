@@ -159,35 +159,39 @@ export default function Dashboard() {
       const safeName = (resume.basics?.name || 'resume').toString().trim() || 'resume';
       const filename = `${safeName.replace(/\s+/g, '-')}-resume.pdf`;
 
-      const response = await fetch('/api/resume/pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ resume, filename, templateId }),
-      });
-
-      if (!response.ok) {
-        const errorBody = await response.json().catch(() => null);
-        throw new Error(errorBody?.error || 'PDF export failed');
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
+      // Primary: client-side high-fidelity PDF export
+      await exportResumeToPDF(resume, filename, templateId);
     } catch (error) {
-      console.warn('Server PDF export failed; falling back to client-side PDF export.', error);
+      console.warn('Client-side PDF export failed; falling back to server-side PDF export.', error);
       try {
         if (!resume) return;
-        const safeName2 = (resume.basics?.name || 'resume').toString().trim() || 'resume';
-        await exportResumeToPDF(resume, `${safeName2.replace(/\s+/g, '-')}-resume.pdf`, templateId);
-      } catch (fallbackError) {
-        console.error('Client-side PDF fallback failed:', fallbackError);
-        alert('Failed to export PDF. Please try again.');
+        const safeName = (resume.basics?.name || 'resume').toString().trim() || 'resume';
+        const filename = `${safeName.replace(/\s+/g, '-')}-resume.pdf`;
+
+        const response = await fetch('/api/resume/pdf', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ resume, filename, templateId }),
+        });
+
+        if (!response.ok) {
+          const errorBody = await response.json().catch(() => null);
+          const detailMsg = errorBody?.details ? `: ${errorBody.details}` : '';
+          throw new Error(`${errorBody?.error || 'PDF export failed'}${detailMsg}`);
+        }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } catch (fallbackError: any) {
+        console.error('Server-side PDF fallback failed:', fallbackError);
+        alert(`Failed to export PDF: ${fallbackError.message || fallbackError}`);
       }
     } finally {
       setIsExporting(false);
