@@ -36,7 +36,7 @@ const Dot = () => <span className="inline-block w-1.5 h-1.5 rounded-full bg-slat
 
 const renderHtml = (value: string, className: string) => (
   <div
-    className={`${className} [&_ul]:list-disc [&_ul]:pl-4 [&_ol]:list-decimal [&_ol]:pl-4 [&_li]:mt-1`}
+    className={`${className} [&_ul]:list-none [&_ul]:pl-0 [&_ul]:space-y-1 [&_ul_li]:relative [&_ul_li]:pl-3.5 [&_ul_li]:mt-0.5 [&_ul_li::before]:content-['•'] [&_ul_li::before]:absolute [&_ul_li::before]:left-0 [&_ul_li::before]:top-[0.5px] [&_ul_li::before]:font-sans [&_ul_li::before]:font-bold [&_ul_li::before]:text-slate-400 [&_ol]:list-decimal [&_ol]:pl-4 [&_ol_li]:mt-0.5`}
     dangerouslySetInnerHTML={{ __html: sanitizeRichText(value) }}
   />
 );
@@ -63,7 +63,7 @@ export const VercelTemplate = React.memo(({ resume }: ResumeProps) => {
       (sections.keyAchievements?.items?.length ?? 0) > 0 ? (
         <section className="space-y-2">
           <div className="text-[10px] uppercase tracking-[0.24em] text-slate-400">Key Achievements</div>
-          <ul className="text-[10.5px] leading-[1.45] text-slate-700 pl-4 list-disc space-y-1">
+          <ul className="text-[10.5px] leading-[1.45] text-slate-700 list-none pl-0 space-y-1 [&_li]:relative [&_li]:pl-3.5 [&_li]:mt-0.5 [&_li::before]:content-['•'] [&_li::before]:absolute [&_li::before]:left-0 [&_li::before]:top-[0.5px] [&_li::before]:font-sans [&_li::before]:font-bold [&_li::before]:text-slate-400">
             {(sections.keyAchievements?.items || []).map((item: any) => (
               <li key={item.id} className="break-inside-avoid">{item.content}</li>
             ))}
@@ -147,7 +147,7 @@ export const VercelTemplate = React.memo(({ resume }: ResumeProps) => {
       ((sections.achievements?.items?.length ?? 0) > 0 || (sections.certifications?.items?.length ?? 0) > 0) ? (
         <section className="space-y-2">
           <div className="text-[10px] uppercase tracking-[0.24em] text-slate-400">Certifications</div>
-          <ul className="text-[10.5px] leading-[1.45] text-slate-700 pl-4 list-disc space-y-1">
+          <ul className="text-[10.5px] leading-[1.45] text-slate-700 list-none pl-0 space-y-1 [&_li]:relative [&_li]:pl-3.5 [&_li]:mt-0.5 [&_li::before]:content-['•'] [&_li::before]:absolute [&_li::before]:left-0 [&_li::before]:top-[0.5px] [&_li::before]:font-sans [&_li::before]:font-bold [&_li::before]:text-slate-400">
             {(sections.achievements?.items || []).map((ach: any) => {
               const parts = [ach.title];
               if (ach.subtitle) parts.push(ach.subtitle);
