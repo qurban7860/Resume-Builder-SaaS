@@ -296,6 +296,11 @@ function renderResumeBodyHTML(resume: any) {
 
   const summaryHTML = sanitizeRichText(sections.summary?.content || '');
 
+  // Render keyAchievements
+  const keyAchievementsHTML = (sections.keyAchievements?.items || [])
+    .map((item: any) => `<li>${escapeHtml(item.content)}</li>`)
+    .join('');
+
   // Render contact info with links
   const contactParts: string[] = [];
   if (basics.location) {
@@ -439,6 +444,57 @@ function renderResumeBodyHTML(resume: any) {
     `
     : '';
 
+  const defaultOrder = ['keyAchievements', 'experience', 'skills', 'projects', 'education', 'certifications'];
+  const sectionOrder = [...(resume.sectionOrder || defaultOrder)];
+
+  // Ensure all default sections are present in the order
+  defaultOrder.forEach((sec) => {
+    if (!sectionOrder.includes(sec)) {
+      sectionOrder.push(sec);
+    }
+  });
+
+  const sectionMap: Record<string, string> = {
+    keyAchievements: keyAchievementsHTML ? `
+      <div class="section-block">
+        <div class="section-title">Key Achievements</div>
+        <ul>
+          ${keyAchievementsHTML}
+        </ul>
+      </div>
+    ` : '',
+    education: educationHTML ? `
+      <div class="section-block">
+        <div class="section-title">Education</div>
+        ${educationHTML}
+      </div>
+    ` : '',
+    skills: skillsHTML ? `
+      <div class="section-block">
+        <div class="section-title">Skills</div>
+        ${skillsHTML}
+      </div>
+    ` : '',
+    experience: experienceHTML ? `
+      <div class="section-block">
+        <div class="section-title">Experience</div>
+        ${experienceHTML}
+      </div>
+    ` : '',
+    projects: projectsHTML ? `
+      <div class="section-block">
+        <div class="section-title">Projects</div>
+        ${projectsHTML}
+      </div>
+    ` : '',
+    certifications: leadershipHTML
+  };
+
+  const orderedSectionsHTML = sectionOrder
+    .map(secId => sectionMap[secId] || '')
+    .filter(Boolean)
+    .join('\n');
+
   return `
     <div class="header">
       <h1>${escapeHtml(basics.name)}</h1>
@@ -453,35 +509,7 @@ function renderResumeBodyHTML(resume: any) {
     </div>
     ` : ''}
 
-    ${educationHTML ? `
-    <div class="section-block">
-      <div class="section-title">Education</div>
-      ${educationHTML}
-    </div>
-    ` : ''}
-
-    ${skillsHTML ? `
-    <div class="section-block">
-      <div class="section-title">Skills</div>
-      ${skillsHTML}
-    </div>
-    ` : ''}
-
-    ${experienceHTML ? `
-    <div class="section-block">
-      <div class="section-title">Experience</div>
-      ${experienceHTML}
-    </div>
-    ` : ''}
-
-    ${projectsHTML ? `
-    <div class="section-block">
-      <div class="section-title">Projects</div>
-      ${projectsHTML}
-    </div>
-    ` : ''}
-
-    ${leadershipHTML}
+    ${orderedSectionsHTML}
   `;
 }
 

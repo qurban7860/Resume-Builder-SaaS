@@ -50,10 +50,20 @@ const renderHtml = (value: string, className: string) => (
     dangerouslySetInnerHTML={{ __html: sanitizeRichText(value) }}
   />
 );
-
 interface Resume {
   basics: { name: string; headline?: string; email: string; phone: string; location: string; url?: { href: string }; linkedin?: string; github?: string };
-  sections: { summary?: { content: string }; experience: { items: any[] }; education: { items: any[] }; projects: { items: any[] }; skills: { items: any[] }; certifications?: { items: any[] }; achievements?: { items: any[] }; keyAchievements?: { items: any[] }; relevantCoursework?: { items: any[] }; };
+  sections: {
+    summary?: { content: string };
+    experience: { items: any[] };
+    education: { items: any[] };
+    projects: { items: any[] };
+    skills: { items: any[] };
+    certifications?: { items: any[] };
+    achievements?: { items: any[] };
+    keyAchievements?: { items: any[] };
+    relevantCoursework?: { items: any[] };
+  };
+  sectionOrder?: string[];
 }
 
 export const ExecutiveTemplate = React.memo(({ resume }: { resume: Resume }) => {
@@ -109,138 +119,143 @@ export const ExecutiveTemplate = React.memo(({ resume }: { resume: Resume }) => 
         </section>
       )}
 
-      {/* ── Key Achievements ── */}
-      {(sections.keyAchievements?.items?.length ?? 0) > 0 && (
-        <section className="mb-2">
-          <SectionTitle>Key Achievements</SectionTitle>
-          <ul style={{ fontSize: '10.5px', color: '#374151', lineHeight: '1.45', paddingLeft: '16px', listStyleType: 'disc' }}>
-            {(sections.keyAchievements?.items || []).map((item: any) => (
-              <li key={item.id} className="break-inside-avoid" style={{ marginBottom: '2px' }}>{item.content}</li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {/* ── Education ── */}
-      {sections.education.items.length > 0 && (
-        <section className="mb-2">
-          <SectionTitle>Education</SectionTitle>
-          <div className="space-y-1.5">
-            {sections.education.items.map((item: any, idx: number) => {
-              const courseText = item.coursework || (idx === 0 ? courseNames : '');
-              return (
-                <div key={item.id} className="break-inside-avoid mb-1">
-                  <div className="flex justify-between items-baseline">
-                    <span style={{ fontSize: '11.5px', fontWeight: 700, color: DARK }}>{item.institution}</span>
-                    <span style={{ fontSize: '10.5px', fontStyle: 'italic', color: MUTED }}>{item.startDate} – {item.endDate}</span>
-                  </div>
-                  <div className="flex justify-between items-baseline">
-                    <span style={{ fontSize: '11px', fontStyle: 'italic', color: '#4b5563' }}>{item.studyType}</span>
-                    {item.location && <span style={{ fontSize: '10px', color: MUTED }}>{item.location}</span>}
-                  </div>
-                  {courseText && (
-                    <p style={{ fontSize: '10px', color: '#6b7280', marginTop: '2px' }}>
-                      <span style={{ fontWeight: 600, color: '#374151' }}>Coursework: </span>{courseText}
-                    </p>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
-      {/* ── Skills ── */}
-      {sections.skills.items.length > 0 && (
-        <section className="mb-2.5">
-          <SectionTitle>Skills</SectionTitle>
-          <div className="space-y-0.5">
-            {sections.skills.items.map((skill: any) => (
-              <div key={skill.id} className="break-inside-avoid" style={{ fontSize: '10.5px', color: '#374151', lineHeight: '1.45' }}>
-                <span style={{ fontWeight: 700, color: DARK }}>{skill.name}: </span>
-                <span>{skill.keywords.join(', ')}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ── Experience ── */}
-      {sections.experience.items.length > 0 && (
-        <section className="mb-2">
-          <SectionTitle>Experience</SectionTitle>
-          <div className="space-y-2">
-            {sections.experience.items.map((item: any) => (
-              <div key={item.id} className="break-inside-avoid mb-2">
-                <div className="flex justify-between items-baseline">
-                  <div style={{ fontSize: '11.5px', lineHeight: '1.3' }}>
-                    {item.companyUrl ? (
-                      <a href={item.companyUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center" style={{ fontWeight: 700, color: DARK }}>
-                        {item.company}<LinkIcon />
-                      </a>
-                    ) : (
-                      <span style={{ fontWeight: 700, color: DARK }}>{item.company}</span>
-                    )}
-                    {item.title && <span style={{ color: '#4b5563' }}> | <span style={{ fontStyle: 'italic' }}>{item.title}</span></span>}
-                    {item.location && <span style={{ color: MUTED }}> | {item.location}</span>}
-                  </div>
-                  <div style={{ fontSize: '10.5px', fontStyle: 'italic', color: MUTED, whiteSpace: 'nowrap', marginLeft: '8px' }}>
-                    {item.startDate} – {item.endDate}
-                  </div>
-                </div>
-                {item.summary && renderHtml(item.summary, 'text-[10.5px] mt-0.5 leading-[1.45] text-[#374151]')}
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* ── Projects ── */}
-      {sections.projects.items.length > 0 && (
-        <section className="mb-2">
-          <SectionTitle>Projects</SectionTitle>
-          <div className="space-y-2">
-            {sections.projects.items.map((proj: any) => {
-              const primaryUrl = proj.projectUrl || proj.githubUrl;
-              return (
-                <div key={proj.id} className="break-inside-avoid mb-2">
-                  <div className="flex justify-between items-baseline">
-                    <div style={{ fontSize: '11.5px', fontWeight: 700, color: DARK }}>
-                      {primaryUrl ? (
-                        <a href={primaryUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center hover:underline" style={{ color: DARK }}>
-                          {proj.name}<LinkIcon />
-                        </a>
-                      ) : <span>{proj.name}</span>}
-                      {proj.technologies && <span style={{ fontWeight: 400, color: '#4b5563' }}> | <span style={{ fontStyle: 'italic' }}>{proj.technologies}</span></span>}
+      {/* Sections dynamically ordered */}
+      {(resume.sectionOrder || ['keyAchievements', 'education', 'skills', 'experience', 'projects', 'certifications']).map((secId) => {
+        if (secId === 'keyAchievements' && (sections.keyAchievements?.items?.length ?? 0) > 0) {
+          return (
+            <section key={secId} className="mb-2">
+              <SectionTitle>Key Achievements</SectionTitle>
+              <ul style={{ fontSize: '10.5px', color: '#374151', lineHeight: '1.45', paddingLeft: '16px', listStyleType: 'disc' }}>
+                {(sections.keyAchievements?.items || []).map((item: any) => (
+                  <li key={item.id} className="break-inside-avoid" style={{ marginBottom: '2px' }}>{item.content}</li>
+                ))}
+              </ul>
+            </section>
+          );
+        }
+        if (secId === 'education' && sections.education.items.length > 0) {
+          return (
+            <section key={secId} className="mb-2">
+              <SectionTitle>Education</SectionTitle>
+              <div className="space-y-1.5">
+                {sections.education.items.map((item: any, idx: number) => {
+                  const courseText = item.coursework || (idx === 0 ? courseNames : '');
+                  return (
+                    <div key={item.id} className="break-inside-avoid mb-1">
+                      <div className="flex justify-between items-baseline">
+                        <span style={{ fontSize: '11.5px', fontWeight: 700, color: DARK }}>{item.institution}</span>
+                        <span style={{ fontSize: '10.5px', fontStyle: 'italic', color: MUTED }}>{item.startDate} – {item.endDate}</span>
+                      </div>
+                      <div className="flex justify-between items-baseline">
+                        <span style={{ fontSize: '11px', fontStyle: 'italic', color: '#4b5563' }}>{item.studyType}</span>
+                        {item.location && <span style={{ fontSize: '10px', color: MUTED }}>{item.location}</span>}
+                      </div>
+                      {courseText && (
+                        <p style={{ fontSize: '10px', color: '#6b7280', marginTop: '2px' }}>
+                          <span style={{ fontWeight: 600, color: '#374151' }}>Coursework: </span>{courseText}
+                        </p>
+                      )}
                     </div>
-                    {proj.date && <div style={{ fontSize: '10.5px', fontStyle: 'italic', color: MUTED, whiteSpace: 'nowrap', marginLeft: '8px' }}>{proj.date}</div>}
+                  );
+                })}
+              </div>
+            </section>
+          );
+        }
+        if (secId === 'skills' && sections.skills.items.length > 0) {
+          return (
+            <section key={secId} className="mb-2.5">
+              <SectionTitle>Skills</SectionTitle>
+              <div className="space-y-0.5">
+                {sections.skills.items.map((skill: any) => (
+                  <div key={skill.id} className="break-inside-avoid" style={{ fontSize: '10.5px', color: '#374151', lineHeight: '1.45' }}>
+                    <span style={{ fontWeight: 700, color: DARK }}>{skill.name}: </span>
+                    <span>{skill.keywords.join(', ')}</span>
                   </div>
-                  {proj.description && renderHtml(proj.description, 'text-[10.5px] mt-0.5 leading-[1.45] text-[#374151]')}
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
-      {/* ── Certificates & Awards ── */}
-      {((sections.achievements?.items?.length ?? 0) > 0 || (sections.certifications?.items?.length ?? 0) > 0) && (
-        <section className="mb-2">
-          <SectionTitle>Certifications</SectionTitle>
-          <ul style={{ fontSize: '10.5px', color: '#374151', paddingLeft: '16px', listStyleType: 'disc', lineHeight: '1.5' }}>
-            {(sections.achievements?.items || []).map((ach: any) => {
-              const parts = [ach.title];
-              if (ach.subtitle) parts.push(ach.subtitle);
-              const base = parts.join(' | ');
-              const dateStr = ach.startDate ? (ach.endDate ? `${ach.startDate} – ${ach.endDate}` : ach.startDate) : '';
-              return <li key={ach.id} style={{ marginBottom: '2px' }}>{base}{dateStr ? ` (${dateStr})` : ''}</li>;
-            })}
-            {(sections.certifications?.items || []).map((cert: any) => (
-              <li key={cert.id} style={{ marginBottom: '2px' }}>{cert.name}</li>
-            ))}
-          </ul>
-        </section>
-      )}
+                ))}
+              </div>
+            </section>
+          );
+        }
+        if (secId === 'experience' && sections.experience.items.length > 0) {
+          return (
+            <section key={secId} className="mb-2">
+              <SectionTitle>Experience</SectionTitle>
+              <div className="space-y-2">
+                {sections.experience.items.map((item: any) => (
+                  <div key={item.id} className="break-inside-avoid mb-2">
+                    <div className="flex justify-between items-baseline">
+                      <div style={{ fontSize: '11.5px', lineHeight: '1.3' }}>
+                        {item.companyUrl ? (
+                          <a href={item.companyUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center" style={{ fontWeight: 700, color: DARK }}>
+                            {item.company}<LinkIcon />
+                          </a>
+                        ) : (
+                          <span style={{ fontWeight: 700, color: DARK }}>{item.company}</span>
+                        )}
+                        {item.title && <span style={{ color: '#4b5563' }}> | <span style={{ fontStyle: 'italic' }}>{item.title}</span></span>}
+                        {item.location && <span style={{ color: MUTED }}> | {item.location}</span>}
+                      </div>
+                      <div style={{ fontSize: '10.5px', fontStyle: 'italic', color: MUTED, whiteSpace: 'nowrap', marginLeft: '8px' }}>
+                        {item.startDate} – {item.endDate}
+                      </div>
+                    </div>
+                    {item.summary && renderHtml(item.summary, 'text-[10.5px] mt-0.5 leading-[1.45] text-[#374151]')}
+                  </div>
+                ))}
+              </div>
+            </section>
+          );
+        }
+        if (secId === 'projects' && sections.projects.items.length > 0) {
+          return (
+            <section key={secId} className="mb-2">
+              <SectionTitle>Projects</SectionTitle>
+              <div className="space-y-2">
+                {sections.projects.items.map((proj: any) => {
+                  const primaryUrl = proj.projectUrl || proj.githubUrl;
+                  return (
+                    <div key={proj.id} className="break-inside-avoid mb-2">
+                      <div className="flex justify-between items-baseline">
+                        <div style={{ fontSize: '11.5px', fontWeight: 700, color: DARK }}>
+                          {primaryUrl ? (
+                            <a href={primaryUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center hover:underline" style={{ color: DARK }}>
+                              {proj.name}<LinkIcon />
+                            </a>
+                          ) : <span>{proj.name}</span>}
+                          {proj.technologies && <span style={{ fontWeight: 400, color: '#4b5563' }}> | <span style={{ fontStyle: 'italic' }}>{proj.technologies}</span></span>}
+                        </div>
+                        {proj.date && <div style={{ fontSize: '10.5px', fontStyle: 'italic', color: MUTED, whiteSpace: 'nowrap', marginLeft: '8px' }}>{proj.date}</div>}
+                      </div>
+                      {proj.description && renderHtml(proj.description, 'text-[10.5px] mt-0.5 leading-[1.45] text-[#374151]')}
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          );
+        }
+        if (secId === 'certifications' && (((sections.achievements?.items?.length ?? 0) > 0 || (sections.certifications?.items?.length ?? 0) > 0))) {
+          return (
+            <section key={secId} className="mb-2">
+              <SectionTitle>Certifications</SectionTitle>
+              <ul style={{ fontSize: '10.5px', color: '#374151', paddingLeft: '16px', listStyleType: 'disc', lineHeight: '1.5' }}>
+                {(sections.achievements?.items || []).map((ach: any) => {
+                  const parts = [ach.title];
+                  if (ach.subtitle) parts.push(ach.subtitle);
+                  const base = parts.join(' | ');
+                  const dateStr = ach.startDate ? (ach.endDate ? `${ach.startDate} – ${ach.endDate}` : ach.startDate) : '';
+                  return <li key={ach.id} style={{ marginBottom: '2px' }}>{base}{dateStr ? ` (${dateStr})` : ''}</li>;
+                })}
+                {(sections.certifications?.items || []).map((cert: any) => (
+                  <li key={cert.id} style={{ marginBottom: '2px' }}>{cert.name}</li>
+                ))}
+              </ul>
+            </section>
+          );
+        }
+        return null;
+      })}
     </div>
   );
 });

@@ -1,4 +1,4 @@
-﻿import { create } from 'zustand';
+import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 type ID = string;
@@ -28,12 +28,14 @@ export interface Resume {
     certifications: { items: any[] };
     relevantCoursework: { items: any[] };
     achievements: { items: any[] };
+    keyAchievements?: { items: any[] };
   };
+  sectionOrder?: string[];
 }
 
 export interface ScoreBreakdownItem {
   id: string;
-  category: 'basics' | 'summary' | 'experience' | 'projects' | 'skills' | 'education' | 'certifications' | 'achievements';
+  category: 'basics' | 'summary' | 'experience' | 'projects' | 'skills' | 'education' | 'certifications' | 'achievements' | 'keyAchievements';
   title: string;
   description: string;
   score: number;
@@ -57,6 +59,7 @@ export interface ResumeStore {
   restoreVersion: (id: ID) => void;
   deleteVersion: (id: ID) => void;
   clear: () => void;
+  moveSection: (fromIndex: number, toIndex: number) => void;
 }
 
 const emptyResume = (): Resume => ({
@@ -77,14 +80,15 @@ const emptyResume = (): Resume => ({
     certifications: { items: [] },
     relevantCoursework: { items: [] },
     achievements: { items: [] },
+    keyAchievements: { items: [] },
   },
+  sectionOrder: ['keyAchievements', 'experience', 'skills', 'projects', 'education', 'certifications'],
 });
 
 const normalizeText = (value?: string) => (value || '').toString().replace(/\s+/g, ' ').trim();
 
 const computeScore = (resume: Resume | null) => {
   if (!resume) return { score: 0, breakdown: [] };
-
   const basics = resume.basics;
   const summary = normalizeText(resume.sections.summary.content);
   const experienceItems = resume.sections.experience.items || [];
@@ -93,6 +97,7 @@ const computeScore = (resume: Resume | null) => {
   const educationItems = resume.sections.education.items || [];
   const certificationItems = resume.sections.certifications.items || [];
   const achievementItems = resume.sections.achievements.items || [];
+  const keyAchievementItems = resume.sections.keyAchievements?.items || [];
 
   const breakdown: ScoreBreakdownItem[] = [];
 
@@ -339,7 +344,6 @@ const computeScore = (resume: Resume | null) => {
     passed: hasCertifications,
     type: hasCertifications ? 'success' : 'warning',
   });
-
   const hasAchievements = achievementItems.length > 0;
   breakdown.push({
     id: 'achievements',
@@ -350,6 +354,18 @@ const computeScore = (resume: Resume | null) => {
     maxScore: 1,
     passed: hasAchievements,
     type: hasAchievements ? 'success' : 'warning',
+  });
+
+  const hasKeyAchievements = keyAchievementItems.length > 0;
+  breakdown.push({
+    id: 'keyAchievements',
+    category: 'keyAchievements',
+    title: 'Key Achievements',
+    description: hasKeyAchievements ? 'Key achievements section is present.' : 'Add a Key Achievements section right after the summary.',
+    score: hasKeyAchievements ? 5 : 0,
+    maxScore: 5,
+    passed: hasKeyAchievements,
+    type: hasKeyAchievements ? 'success' : 'warning',
   });
 
   const score = breakdown.reduce((total, item) => total + item.score, 0);
@@ -391,6 +407,20 @@ export const useResumeStore = create<ResumeStore>()(
                 ...state.resume.sections,
                 [section]: { ...sectionValue, items },
               },
+            },
+          };
+        }),
+      moveSection: (fromIndex, toIndex) =>
+        set((state) => {
+          if (!state.resume) return state;
+          const order = [...(state.resume.sectionOrder || ['keyAchievements', 'experience', 'skills', 'projects', 'education', 'certifications'])];
+          if (fromIndex < 0 || toIndex < 0 || fromIndex >= order.length || toIndex >= order.length) return state;
+          const [item] = order.splice(fromIndex, 1);
+          order.splice(toIndex, 0, item);
+          return {
+            resume: {
+              ...state.resume,
+              sectionOrder: order,
             },
           };
         }),

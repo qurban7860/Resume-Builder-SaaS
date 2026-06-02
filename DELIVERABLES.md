@@ -12,7 +12,7 @@
 - **Candidate**: Qurban Hanif
 - **Headline**: Software Engineer
 - **Contact**: Email, Phone, Location
-- **Experience**: 3 positions (Sigi Technologies, Terminus Technologies, COSVM Labs)
+- **Experience**: 3 positions (Strategist Hub, Terminus Technologies, COSVM Labs)
 - **Education**: BS Software Engineering (PUCIT)
 - **Projects**: 3 projects with descriptions
 - **Skills**: 2 categories with keywords
@@ -197,8 +197,8 @@ All fields required and properly typed.
   "location": "Lahore",
   "experience": [
     {
-      "title": "Frontend Engineer",
-      "company": "Sigi Technologies",
+      "title": "Assosiate Software Engineer",
+      "company": "Strategist Hub",
       "dates": "07/2025 - Present",
       "bullets": 2
     },

@@ -56,6 +56,7 @@ interface Resume {
     keyAchievements?: { items: any[] };
     relevantCoursework?: { items: any[] };
   };
+  sectionOrder?: string[];
 }
 
 export const ClassicTemplate = React.memo(({ resume }: { resume: Resume }) => {
@@ -103,136 +104,141 @@ export const ClassicTemplate = React.memo(({ resume }: { resume: Resume }) => {
         </section>
       )}
 
-      {/* Key Achievements */}
-      {(sections.keyAchievements?.items?.length ?? 0) > 0 && (
-        <section className="mb-2">
-          <SectionTitle>Key Achievements</SectionTitle>
-          <ul className="text-[10.5px] text-gray-800 leading-[1.45] pl-4 list-disc space-y-1">
-            {(sections.keyAchievements?.items || []).map((item: any) => (
-              <li key={item.id} className="break-inside-avoid">{item.content}</li>
-            ))}
-          </ul>
-        </section>
-      )}
-
-      {/* Education */}
-      {sections.education.items.length > 0 && (
-        <section className="mb-2">
-          <SectionTitle>Education</SectionTitle>
-          <div className="space-y-1.5">
-            {sections.education.items.map((item: any, idx: number) => {
-              const courseText = item.coursework || (idx === 0 ? courseNames : '');
-              return (
-                <div key={item.id} className="break-inside-avoid mb-1">
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-[11.5px] font-bold text-gray-950">{item.institution}</span>
-                    <span className="text-[11px] font-bold text-gray-950 whitespace-nowrap">{item.startDate} – {item.endDate}</span>
-                  </div>
-                  <div className="flex justify-between items-baseline">
-                    <span className="text-[11px] italic text-gray-700">{item.studyType}</span>
-                    {item.location && <span className="text-[10.5px] italic text-gray-600">{item.location}</span>}
-                  </div>
-                  {courseText && (
-                    <p className="text-[10px] text-gray-700 mt-0.5">
-                      <span className="font-semibold text-gray-900">Coursework: </span>{courseText}
-                    </p>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
-      {/* Skills */}
-      {sections.skills.items.length > 0 && (
-        <section className="mb-2">
-          <SectionTitle>Skills</SectionTitle>
-          <div className="space-y-0.5">
-            {sections.skills.items.map((skill: any) => (
-              <div key={skill.id} className="text-[10.5px] text-gray-800 leading-[1.4] break-inside-avoid">
-                <span className="font-bold text-gray-950">{skill.name}: </span>
-                <span>{skill.keywords.join(', ')}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Experience */}
-      {sections.experience.items.length > 0 && (
-        <section className="mb-2">
-          <SectionTitle>Experience</SectionTitle>
-          <div className="space-y-2">
-            {sections.experience.items.map((item: any) => (
-              <div key={item.id} className="break-inside-avoid mb-2">
-                <div className="flex justify-between items-baseline">
-                  <div className="text-[11.5px] text-gray-950 leading-snug">
-                    {item.companyUrl ? (
-                      <a href={item.companyUrl} target="_blank" rel="noopener noreferrer" className="font-bold hover:underline inline-flex items-center">
-                        {item.company}<LinkIcon />
-                      </a>
-                    ) : (
-                      <span className="font-bold">{item.company}</span>
-                    )}
-                    {item.title && <span className="font-normal text-gray-700"> | <span className="italic">{item.title}</span></span>}
-                    {item.location && <span className="font-normal text-gray-500"> | <span className="italic">{item.location}</span></span>}
-                  </div>
-                  <div className="text-[11px] font-bold text-gray-950 whitespace-nowrap ml-2">{item.startDate} – {item.endDate}</div>
-                </div>
-                {item.summary && renderHtml(item.summary, 'text-[10.5px] text-gray-800 mt-0.5 leading-[1.4]')}
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Projects */}
-      {sections.projects.items.length > 0 && (
-        <section className="mb-2">
-          <SectionTitle>Projects</SectionTitle>
-          <div className="space-y-2">
-            {sections.projects.items.map((proj: any) => {
-              const primaryUrl = proj.projectUrl || proj.githubUrl;
-              return (
-                <div key={proj.id} className="break-inside-avoid mb-2">
-                  <div className="flex justify-between items-baseline">
-                    <div className="text-[11.5px] text-gray-950 font-bold leading-snug">
-                      {primaryUrl ? (
-                        <a href={primaryUrl} target="_blank" rel="noopener noreferrer" className="hover:underline inline-flex items-center">
-                          {proj.name}<LinkIcon />
-                        </a>
-                      ) : <span>{proj.name}</span>}
-                      {proj.technologies && <span className="font-normal text-gray-700"> | <span className="italic">{proj.technologies}</span></span>}
+      {/* Sections dynamically ordered */}
+      {(resume.sectionOrder || ['keyAchievements', 'education', 'skills', 'experience', 'projects', 'certifications']).map((secId) => {
+        if (secId === 'keyAchievements' && (sections.keyAchievements?.items?.length ?? 0) > 0) {
+          return (
+            <section key={secId} className="mb-2">
+              <SectionTitle>Key Achievements</SectionTitle>
+              <ul className="text-[10.5px] text-gray-800 leading-[1.45] pl-4 list-disc space-y-1">
+                {(sections.keyAchievements?.items || []).map((item: any) => (
+                  <li key={item.id} className="break-inside-avoid">{item.content}</li>
+                ))}
+              </ul>
+            </section>
+          );
+        }
+        if (secId === 'education' && sections.education.items.length > 0) {
+          return (
+            <section key={secId} className="mb-2">
+              <SectionTitle>Education</SectionTitle>
+              <div className="space-y-1.5">
+                {sections.education.items.map((item: any, idx: number) => {
+                  const courseText = item.coursework || (idx === 0 ? courseNames : '');
+                  return (
+                    <div key={item.id} className="break-inside-avoid mb-1">
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-[11.5px] font-bold text-gray-950">{item.institution}</span>
+                        <span className="text-[11px] font-bold text-gray-950 whitespace-nowrap">{item.startDate} – {item.endDate}</span>
+                      </div>
+                      <div className="flex justify-between items-baseline">
+                        <span className="text-[11px] italic text-gray-700">{item.studyType}</span>
+                        {item.location && <span className="text-[10.5px] italic text-gray-600">{item.location}</span>}
+                      </div>
+                      {courseText && (
+                        <p className="text-[10px] text-gray-700 mt-0.5">
+                          <span className="font-semibold text-gray-900">Coursework: </span>{courseText}
+                        </p>
+                      )}
                     </div>
-                    {proj.date && <div className="text-[11px] font-bold text-gray-950 whitespace-nowrap ml-2">{proj.date}</div>}
+                  );
+                })}
+              </div>
+            </section>
+          );
+        }
+        if (secId === 'skills' && sections.skills.items.length > 0) {
+          return (
+            <section key={secId} className="mb-2">
+              <SectionTitle>Skills</SectionTitle>
+              <div className="space-y-0.5">
+                {sections.skills.items.map((skill: any) => (
+                  <div key={skill.id} className="text-[10.5px] text-gray-800 leading-[1.4] break-inside-avoid">
+                    <span className="font-bold text-gray-950">{skill.name}: </span>
+                    <span>{skill.keywords.join(', ')}</span>
                   </div>
-                  {proj.description && renderHtml(proj.description, 'text-[10.5px] text-gray-800 mt-0.5 leading-[1.4]')}
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
-      {/* Certificates & Awards */}
-      {((sections.achievements?.items?.length ?? 0) > 0 || (sections.certifications?.items?.length ?? 0) > 0) && (
-        <section className="mb-2">
-          <SectionTitle>Certifications</SectionTitle>
-          <ul className="text-[10.5px] text-gray-800 list-disc pl-4 space-y-[2px] leading-[1.4]">
-            {(sections.achievements?.items || []).map((ach: any) => {
-              const parts = [ach.title];
-              if (ach.subtitle) parts.push(ach.subtitle);
-              const base = parts.join(' | ');
-              let dateStr = ach.startDate ? (ach.endDate ? `${ach.startDate} – ${ach.endDate}` : ach.startDate) : '';
-              return <li key={ach.id}>{base}{dateStr ? ` (${dateStr})` : ''}</li>;
-            })}
-            {(sections.certifications?.items || []).map((cert: any) => (
-              <li key={cert.id}>{cert.name}</li>
-            ))}
-          </ul>
-        </section>
-      )}
+                ))}
+              </div>
+            </section>
+          );
+        }
+        if (secId === 'experience' && sections.experience.items.length > 0) {
+          return (
+            <section key={secId} className="mb-2">
+              <SectionTitle>Experience</SectionTitle>
+              <div className="space-y-2">
+                {sections.experience.items.map((item: any) => (
+                  <div key={item.id} className="break-inside-avoid mb-2">
+                    <div className="flex justify-between items-baseline">
+                      <div className="text-[11.5px] text-gray-950 leading-snug">
+                        {item.companyUrl ? (
+                          <a href={item.companyUrl} target="_blank" rel="noopener noreferrer" className="font-bold hover:underline inline-flex items-center">
+                            {item.company}<LinkIcon />
+                          </a>
+                        ) : (
+                          <span className="font-bold">{item.company}</span>
+                        )}
+                        {item.title && <span className="font-normal text-gray-700"> | <span className="italic">{item.title}</span></span>}
+                        {item.location && <span className="font-normal text-gray-500"> | <span className="italic">{item.location}</span></span>}
+                      </div>
+                      <div className="text-[11px] font-bold text-gray-950 whitespace-nowrap ml-2">{item.startDate} – {item.endDate}</div>
+                    </div>
+                    {item.summary && renderHtml(item.summary, 'text-[10.5px] text-gray-800 mt-0.5 leading-[1.4]')}
+                  </div>
+                ))}
+              </div>
+            </section>
+          );
+        }
+        if (secId === 'projects' && sections.projects.items.length > 0) {
+          return (
+            <section key={secId} className="mb-2">
+              <SectionTitle>Projects</SectionTitle>
+              <div className="space-y-2">
+                {sections.projects.items.map((proj: any) => {
+                  const primaryUrl = proj.projectUrl || proj.githubUrl;
+                  return (
+                    <div key={proj.id} className="break-inside-avoid mb-2">
+                      <div className="flex justify-between items-baseline">
+                        <div className="text-[11.5px] text-gray-950 font-bold leading-snug">
+                          {primaryUrl ? (
+                            <a href={primaryUrl} target="_blank" rel="noopener noreferrer" className="hover:underline inline-flex items-center">
+                              {proj.name}<LinkIcon />
+                            </a>
+                          ) : <span>{proj.name}</span>}
+                          {proj.technologies && <span className="font-normal text-gray-700"> | <span className="italic">{proj.technologies}</span></span>}
+                        </div>
+                        {proj.date && <div className="text-[11px] font-bold text-gray-950 whitespace-nowrap ml-2">{proj.date}</div>}
+                      </div>
+                      {proj.description && renderHtml(proj.description, 'text-[10.5px] text-gray-800 mt-0.5 leading-[1.4]')}
+                    </div>
+                  );
+                })}
+              </div>
+            </section>
+          );
+        }
+        if (secId === 'certifications' && (((sections.achievements?.items?.length ?? 0) > 0 || (sections.certifications?.items?.length ?? 0) > 0))) {
+          return (
+            <section key={secId} className="mb-2">
+              <SectionTitle>Certifications</SectionTitle>
+              <ul className="text-[10.5px] text-gray-800 list-disc pl-4 space-y-[2px] leading-[1.4]">
+                {(sections.achievements?.items || []).map((ach: any) => {
+                  const parts = [ach.title];
+                  if (ach.subtitle) parts.push(ach.subtitle);
+                  const base = parts.join(' | ');
+                  let dateStr = ach.startDate ? (ach.endDate ? `${ach.startDate} – ${ach.endDate}` : ach.startDate) : '';
+                  return <li key={ach.id}>{base}{dateStr ? ` (${dateStr})` : ''}</li>;
+                })}
+                {(sections.certifications?.items || []).map((cert: any) => (
+                  <li key={cert.id}>{cert.name}</li>
+                ))}
+              </ul>
+            </section>
+          );
+        }
+        return null;
+      })}
     </div>
   );
 });

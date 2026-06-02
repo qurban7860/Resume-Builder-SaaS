@@ -20,15 +20,23 @@
       "items": [
         {
           "id": "ka-1",
-          "content": "Spearheaded the development of a production-grade, multi-tenant CRM SaaS platform featuring RBAC, Stripe billing, and real-time WebSockets."
+          "content": "Built multiple production-grade SaaS platforms including a Multi-Tenant CRM, ATS Resume Builder, and 3D SaaS Portfolio Platform."
         },
         {
           "id": "ka-2",
-          "content": "Engineered and scaled enterprise applications serving global clients across 75+ countries, architecting robust frontend interfaces and RESTful APIs."
+          "content": "Developed AI-powered workflows using LLM integrations and Retrieval-Augmented Generation (RAG) systems."
         },
         {
           "id": "ka-3",
-          "content": "Integrated advanced AI automation and RAG-based workflows into enterprise systems, leveraging LLMs and vector databases to enhance data retrieval."
+          "content": "Engineered enterprise applications featuring RBAC, workflow automation, real-time collaboration, and scalable system architecture."
+        },
+        {
+          "id": "ka-4",
+          "content": "Delivered software solutions using React, Angular, Next.js, NestJS, TypeScript, PostgreSQL, and cloud-native technologies."
+        },
+        {
+          "id": "ka-5",
+          "content": "Designed and deployed full-stack applications focused on scalability, security, performance optimization, and exceptional user experience."
         }
       ]
     },
@@ -47,11 +55,11 @@
         {
           "id": "3d2e1f44-1c2a-4e77-8a1b-9f0c2d3e4b5a",
           "title": "Frontend Engineer",
-          "company": "Sigi Technologies",
+          "company": "Strategist Hub",
           "companyUrl": "",
           "startDate": "07/2025",
           "endDate": "11/2025",
-          "summary": "<ul><li>Architected the client-facing frontend of the BusyBeans Coffee U.S. platform using Next.js, Tailwind CSS, and aggressive SSR/SSG caching strategies.</li><li>Spearheaded role-based user experiences that streamlined complex account workflows and improved overall operational efficiency by 25%.</li><li>Optimized rendering performance, code-splitting, and responsive layouts to guarantee consistent, high-speed experiences across desktop and mobile devices.</li></ul>",
+          "summary": "<ul><li>Built an AI desktop assistant for meditation and mindfulness using Electron, React, and Vite, enabling real-time voice and text interaction with an AI agent.</li><li>Integrated ElevenLabs voice AI, Firebase authentication, and a meditation content library with a glassmorphism UI, supporting secure login, chat history, and personalized user experience.</li><li>Optimized rendering performance, code-splitting, and responsive layouts to guarantee consistent, high-speed experiences across desktop and mobile devices.</li></ul>",
           "location": "Lahore, Pakistan"
         },
         {
