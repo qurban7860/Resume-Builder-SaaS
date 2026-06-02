@@ -60,8 +60,8 @@ export const VercelTemplate = React.memo(({ resume }: ResumeProps) => {
 
   return (
     <div className="bg-white text-slate-950 font-sans" style={{ minHeight: '100%', width: '100%' }}>
-      <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-2 border-b border-slate-200 pb-4">
+      <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 border-b border-slate-200 pb-2">
           <h1 className="text-[30px] font-extrabold tracking-tight leading-none">{basics.name}</h1>
           {basics.headline && <p className="text-[11px] uppercase tracking-[0.32em] text-slate-500">{basics.headline}</p>}
           <div className="flex flex-wrap gap-2 text-[10px] text-slate-600">
@@ -77,17 +77,17 @@ export const VercelTemplate = React.memo(({ resume }: ResumeProps) => {
         {sections.summary?.content && (
           <section className="space-y-2">
             <div className="text-[10px] uppercase tracking-[0.24em] text-slate-400">Summary</div>
-            {renderHtml(sections.summary.content, 'text-[10.5px] leading-6 text-slate-700')}
+            {renderHtml(sections.summary.content, 'text-[10.5px] leading-[1.45] text-slate-700')}
           </section>
         )}
 
         <div className="grid gap-4">
           {sections.experience?.items?.length > 0 && (
-            <section className="space-y-3">
+            <section className="space-y-2">
               <div className="text-[10px] uppercase tracking-[0.24em] text-slate-400">Experience</div>
-              <div className="space-y-4">
+              <div className="space-y-2">
                 {sections.experience.items.map((item: any) => (
-                    <div key={item.id} className="space-y-1">
+                    <div key={item.id} className="space-y-1 break-inside-avoid">
                       <div className="flex justify-between items-start gap-3">
                         <div>
                           <div className="text-[11.5px] font-semibold text-slate-950">{item.title} @ {item.company}</div>
@@ -95,7 +95,7 @@ export const VercelTemplate = React.memo(({ resume }: ResumeProps) => {
                         </div>
                         <div className="text-[10px] font-semibold text-slate-600 whitespace-nowrap">{item.startDate} – {item.endDate}</div>
                       </div>
-                      {item.summary && renderHtml(item.summary, 'text-[10.5px] text-slate-700 leading-6')}
+                      {item.summary && renderHtml(item.summary, 'text-[10.5px] text-slate-700 leading-[1.45]')}
                     </div>
                 ))}
               </div>
@@ -105,14 +105,14 @@ export const VercelTemplate = React.memo(({ resume }: ResumeProps) => {
           {sections.projects?.items?.length > 0 && (
             <section className="space-y-2">
               <div className="text-[10px] uppercase tracking-[0.24em] text-slate-400">Projects</div>
-              <div className="space-y-3">
+              <div className="space-y-2">
                 {sections.projects.items.map((proj: any) => (
-                    <div key={proj.id}>
+                    <div key={proj.id} className="break-inside-avoid mb-1">
                       <div className="flex justify-between items-baseline gap-3">
                         <div className="text-[11.5px] font-semibold text-slate-950">{proj.name}</div>
                         {proj.date && <div className="text-[10px] text-slate-600">{proj.date}</div>}
                       </div>
-                      {proj.description && renderHtml(proj.description, 'text-[10.5px] text-slate-700 leading-6')}
+                      {proj.description && renderHtml(proj.description, 'text-[10.5px] text-slate-700 leading-[1.45]')}
                     </div>
                 ))}
               </div>
@@ -122,9 +122,9 @@ export const VercelTemplate = React.memo(({ resume }: ResumeProps) => {
           {sections.skills?.items?.length > 0 && (
             <section className="space-y-2">
               <div className="text-[10px] uppercase tracking-[0.24em] text-slate-400">Skills</div>
-              <div className="text-[10.5px] leading-6 text-slate-700 space-y-1">
+              <div className="text-[10.5px] leading-[1.45] text-slate-700 space-y-1">
                 {sections.skills.items.map((skill: any) => (
-                  <div key={skill.id}><span className="font-semibold text-slate-950">{skill.name}:</span> {skill.keywords.join(', ')}</div>
+                  <div key={skill.id} className="break-inside-avoid"><span className="font-semibold text-slate-950">{skill.name}:</span> {skill.keywords.join(', ')}</div>
                 ))}
               </div>
             </section>

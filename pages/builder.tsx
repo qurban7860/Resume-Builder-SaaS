@@ -26,8 +26,10 @@ export default function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
   const [zoom, setZoom] = useState(1.0);
-  const previewPageRef = useRef<HTMLDivElement | null>(null);
-  const [pageOverflow, setPageOverflow] = useState(false);
+  // Dynamic A4 canvas height — measured from actual rendered content
+  const resumeContentRef = useRef<HTMLDivElement | null>(null);
+  const [contentHeightPx, setContentHeightPx] = useState(1122); // 297mm @ 96 dpi
+  const A4_HEIGHT_PX = 1122; // 297mm at 96 dpi
   const [mobileTab, setMobileTab] = useState<'editor' | 'preview'>('editor');
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [showHeatmap, setShowHeatmap] = useState(false);
@@ -85,23 +87,17 @@ export default function Dashboard() {
   }, [loading]);
 
   useEffect(() => {
-    if (!previewPageRef.current) {
-      return;
-    }
-
-    const updateOverflow = () => {
-      const page = previewPageRef.current;
-      if (!page) return;
-      setPageOverflow(page.scrollHeight > page.clientHeight + 1);
-    };
-
-    updateOverflow();
-
-    const observer = new ResizeObserver(() => updateOverflow());
-    observer.observe(previewPageRef.current);
-
+    // Measure actual rendered content height for dynamic A4 canvas sizing
+    const el = resumeContentRef.current;
+    if (!el) return;
+    const observer = new ResizeObserver(entries => {
+      for (const entry of entries) {
+        setContentHeightPx(entry.contentRect.height);
+      }
+    });
+    observer.observe(el);
     return () => observer.disconnect();
-  }, [resume, templateId, zoom]);
+  }, [resumeContentRef]);
 
   useEffect(() => {
     // Update score whenever resume changes
@@ -581,40 +577,58 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {pageOverflow ? (
+          {/* Page-fit status banner */}
+          {contentHeightPx > A4_HEIGHT_PX + 20 ? (
             <div className="w-full max-w-[210mm] rounded-2xl border border-amber-200 bg-amber-50 text-amber-900 px-4 py-3 text-sm font-semibold shadow-sm">
-              ⚠️ This resume content exceeds one A4 page. Remove or shorten text so the PDF export stays on a single page.
+              📄 Resume spans <strong>{Math.ceil(contentHeightPx / A4_HEIGHT_PX)} pages</strong> — page break shown below. PDF export will auto-paginate.
             </div>
           ) : (
-            <div className="w-full max-w-[210mm] rounded-2xl border border-slate-200 bg-white/80 text-slate-500 px-4 py-3 text-sm font-medium shadow-sm">
-              ✅ Fits a single A4 page in live preview.
+            <div className="w-full max-w-[210mm] rounded-2xl border border-green-200 bg-green-50 text-green-800 px-4 py-3 text-sm font-medium shadow-sm">
+              ✅ Fits a single A4 page — ideal for most applications.
             </div>
           )}
 
-          {/* Centered Premium Shadow-A4 Preview Box */}
-          <div className="w-full flex justify-center items-start overflow-visible py-2" style={{ minHeight: `calc(297mm * ${zoom})` }}>
-            <div 
-              style={{ 
+          {/* ── A4 Preview Canvas (dynamic height) ── */}
+          <div className="w-full flex justify-center items-start py-2">
+            {/* Outer sizer: width = 210mm * zoom, height tracks actual content */}
+            <div
+              style={{
                 width: `calc(210mm * ${zoom})`,
-                height: `calc(297mm * ${zoom})`,
+                height: `${Math.max(A4_HEIGHT_PX, contentHeightPx) * zoom}px`,
                 position: 'relative',
-                overflow: 'visible'
+                flexShrink: 0,
               }}
-              className="flex-shrink-0 select-none"
             >
-              <div 
-                ref={previewPageRef}
-                style={{ 
-                  transform: `scale(${zoom})`, 
+              {/* ── Page break ruler at exactly 297mm * zoom ── */}
+              {contentHeightPx > A4_HEIGHT_PX + 20 && (
+                <div
+                  className="absolute left-0 right-0 z-20 pointer-events-none"
+                  style={{ top: `${A4_HEIGHT_PX * zoom}px` }}
+                >
+                  <div className="relative flex items-center">
+                    <div className="flex-1 border-t-2 border-dashed border-red-400/70" />
+                    <span className="mx-2 text-[9px] font-bold text-red-500 bg-red-50 border border-red-200 px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap select-none">
+                      ↑ Page 1 · Page 2 ↓
+                    </span>
+                    <div className="flex-1 border-t-2 border-dashed border-red-400/70" />
+                  </div>
+                </div>
+              )}
+
+              {/* ── The scaled A4 sheet ── */}
+              <div
+                ref={resumeContentRef}
+                style={{
+                  transform: `scale(${zoom})`,
                   transformOrigin: 'top left',
                   width: '210mm',
-                  height: '297mm',
+                  minHeight: '297mm',
                   position: 'absolute',
                   top: 0,
                   left: 0,
                   transition: 'transform 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
                 }}
-                className="bg-white shadow-[0_25px_60px_rgba(15,23,42,0.12)] border border-slate-200/60 rounded-2xl overflow-hidden"
+                className="bg-white shadow-[0_25px_60px_rgba(15,23,42,0.12)] border border-slate-200/60 rounded-2xl"
               >
                 <div id="resume-preview" className="w-full">
                   <ResumeRenderer resume={resume} printMode={true} />

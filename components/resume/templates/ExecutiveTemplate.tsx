@@ -72,7 +72,7 @@ export const ExecutiveTemplate = React.memo(({ resume }: { resume: Resume }) => 
   return (
     <div className="bg-white" style={{ fontFamily: SERIF, color: '#2d2d2d' }}>
       {/* ── Two-column Header ── */}
-      <header className="flex items-start justify-between mb-3 pb-2.5" style={{ borderBottom: '1.5px double #6b21a8' }}>
+      <header className="flex items-start justify-between mb-2 pb-2" style={{ borderBottom: '1.5px double #6b21a8' }}>
         {/* Left: Name + Title */}
         <div className="flex-1 pr-4">
           <h1 style={{ fontSize: '26px', fontWeight: 700, color: DARK, lineHeight: 1.1, letterSpacing: '-0.01em', marginBottom: '3px' }}>
@@ -103,21 +103,21 @@ export const ExecutiveTemplate = React.memo(({ resume }: { resume: Resume }) => 
 
       {/* ── Summary ── */}
       {sections.summary?.content && (
-        <section className="mb-2.5">
+        <section className="mb-2">
           <SectionTitle>Summary</SectionTitle>
-          {renderHtml(sections.summary.content, 'text-[10.5px] leading-[1.55] text-[#374151]')}
+          {renderHtml(sections.summary.content, 'text-[10.5px] leading-[1.45] text-[#374151]')}
         </section>
       )}
 
       {/* ── Education ── */}
       {sections.education.items.length > 0 && (
-        <section className="mb-2.5">
+        <section className="mb-2">
           <SectionTitle>Education</SectionTitle>
           <div className="space-y-1.5">
             {sections.education.items.map((item: any, idx: number) => {
               const courseText = item.coursework || (idx === 0 ? courseNames : '');
               return (
-                <div key={item.id}>
+                <div key={item.id} className="break-inside-avoid mb-1">
                   <div className="flex justify-between items-baseline">
                     <span style={{ fontSize: '11.5px', fontWeight: 700, color: DARK }}>{item.institution}</span>
                     <span style={{ fontSize: '10.5px', fontStyle: 'italic', color: MUTED }}>{item.startDate} – {item.endDate}</span>
@@ -144,7 +144,7 @@ export const ExecutiveTemplate = React.memo(({ resume }: { resume: Resume }) => 
           <SectionTitle>Skills</SectionTitle>
           <div className="space-y-0.5">
             {sections.skills.items.map((skill: any) => (
-              <div key={skill.id} style={{ fontSize: '10.5px', color: '#374151', lineHeight: '1.5' }}>
+              <div key={skill.id} className="break-inside-avoid" style={{ fontSize: '10.5px', color: '#374151', lineHeight: '1.45' }}>
                 <span style={{ fontWeight: 700, color: DARK }}>{skill.name}: </span>
                 <span>{skill.keywords.join(', ')}</span>
               </div>
@@ -155,11 +155,11 @@ export const ExecutiveTemplate = React.memo(({ resume }: { resume: Resume }) => 
 
       {/* ── Experience ── */}
       {sections.experience.items.length > 0 && (
-        <section className="mb-2.5">
+        <section className="mb-2">
           <SectionTitle>Experience</SectionTitle>
-          <div className="space-y-2.5">
+          <div className="space-y-2">
             {sections.experience.items.map((item: any) => (
-              <div key={item.id}>
+              <div key={item.id} className="break-inside-avoid mb-2">
                 <div className="flex justify-between items-baseline">
                   <div style={{ fontSize: '11.5px', lineHeight: '1.3' }}>
                     {item.companyUrl ? (
@@ -176,7 +176,7 @@ export const ExecutiveTemplate = React.memo(({ resume }: { resume: Resume }) => 
                     {item.startDate} – {item.endDate}
                   </div>
                 </div>
-                {item.summary && renderHtml(item.summary, 'text-[10.5px] mt-3 leading-[1.5] text-[#374151]')}
+                {item.summary && renderHtml(item.summary, 'text-[10.5px] mt-0.5 leading-[1.45] text-[#374151]')}
               </div>
             ))}
           </div>
@@ -185,13 +185,13 @@ export const ExecutiveTemplate = React.memo(({ resume }: { resume: Resume }) => 
 
       {/* ── Projects ── */}
       {sections.projects.items.length > 0 && (
-        <section className="mb-2.5">
+        <section className="mb-2">
           <SectionTitle>Projects</SectionTitle>
           <div className="space-y-2">
             {sections.projects.items.map((proj: any) => {
               const primaryUrl = proj.projectUrl || proj.githubUrl;
               return (
-                <div key={proj.id}>
+                <div key={proj.id} className="break-inside-avoid mb-2">
                   <div className="flex justify-between items-baseline">
                     <div style={{ fontSize: '11.5px', fontWeight: 700, color: DARK }}>
                       {primaryUrl ? (
@@ -203,7 +203,7 @@ export const ExecutiveTemplate = React.memo(({ resume }: { resume: Resume }) => 
                     </div>
                     {proj.date && <div style={{ fontSize: '10.5px', fontStyle: 'italic', color: MUTED, whiteSpace: 'nowrap', marginLeft: '8px' }}>{proj.date}</div>}
                   </div>
-                  {proj.description && renderHtml(proj.description, 'text-[10.5px] mt-3 leading-[1.5] text-[#374151]')}
+                  {proj.description && renderHtml(proj.description, 'text-[10.5px] mt-0.5 leading-[1.45] text-[#374151]')}
                 </div>
               );
             })}

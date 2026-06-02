@@ -110,7 +110,7 @@ export const ClassicTemplate = React.memo(({ resume }: { resume: Resume }) => {
             {sections.education.items.map((item: any, idx: number) => {
               const courseText = item.coursework || (idx === 0 ? courseNames : '');
               return (
-                <div key={item.id}>
+                <div key={item.id} className="break-inside-avoid mb-1">
                   <div className="flex justify-between items-baseline">
                     <span className="text-[11.5px] font-bold text-gray-950">{item.institution}</span>
                     <span className="text-[11px] font-bold text-gray-950 whitespace-nowrap">{item.startDate} – {item.endDate}</span>
@@ -137,7 +137,7 @@ export const ClassicTemplate = React.memo(({ resume }: { resume: Resume }) => {
           <SectionTitle>Skills</SectionTitle>
           <div className="space-y-0.5">
             {sections.skills.items.map((skill: any) => (
-              <div key={skill.id} className="text-[10.5px] text-gray-800 leading-[1.4]">
+              <div key={skill.id} className="text-[10.5px] text-gray-800 leading-[1.4] break-inside-avoid">
                 <span className="font-bold text-gray-950">{skill.name}: </span>
                 <span>{skill.keywords.join(', ')}</span>
               </div>
@@ -152,7 +152,7 @@ export const ClassicTemplate = React.memo(({ resume }: { resume: Resume }) => {
           <SectionTitle>Experience</SectionTitle>
           <div className="space-y-2">
             {sections.experience.items.map((item: any) => (
-              <div key={item.id}>
+              <div key={item.id} className="break-inside-avoid mb-2">
                 <div className="flex justify-between items-baseline">
                   <div className="text-[11.5px] text-gray-950 leading-snug">
                     {item.companyUrl ? (
@@ -182,7 +182,7 @@ export const ClassicTemplate = React.memo(({ resume }: { resume: Resume }) => {
             {sections.projects.items.map((proj: any) => {
               const primaryUrl = proj.projectUrl || proj.githubUrl;
               return (
-                <div key={proj.id}>
+                <div key={proj.id} className="break-inside-avoid mb-2">
                   <div className="flex justify-between items-baseline">
                     <div className="text-[11.5px] text-gray-950 font-bold leading-snug">
                       {primaryUrl ? (
