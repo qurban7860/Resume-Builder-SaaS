@@ -37,7 +37,17 @@ export default function Dashboard() {
   useEffect(() => {
     // Load initial resume data
     if (!resume) {
-      const hasSaved = typeof window !== 'undefined' && !!localStorage.getItem('resume-store');
+      const hasSaved = typeof window !== 'undefined' && (() => {
+        try {
+          const raw = localStorage.getItem('resume-store');
+          if (!raw) return false;
+          const parsed = JSON.parse(raw);
+          return parsed && parsed.resume && Object.keys(parsed.resume).length > 0;
+        } catch {
+          return false;
+        }
+      })();
+
       if (!hasSaved) {
         setResume(resumeData as any);
       }
