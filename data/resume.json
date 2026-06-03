@@ -24,18 +24,6 @@
         },
         {
           "id": "ka-2",
-          "content": "Developed AI-powered workflows using LLM integrations and Retrieval-Augmented Generation (RAG) systems."
-        },
-        {
-          "id": "ka-3",
-          "content": "Engineered enterprise applications featuring RBAC, workflow automation, real-time collaboration, and scalable system architecture."
-        },
-        {
-          "id": "ka-4",
-          "content": "Delivered software solutions using React, Angular, Next.js, NestJS, TypeScript, PostgreSQL, and cloud-native technologies."
-        },
-        {
-          "id": "ka-5",
           "content": "Designed and deployed full-stack applications focused on scalability, security, performance optimization, and exceptional user experience."
         }
       ]
@@ -54,7 +42,7 @@
         },
         {
           "id": "3d2e1f44-1c2a-4e77-8a1b-9f0c2d3e4b5a",
-          "title": "Frontend Engineer",
+          "title": "Assosiate Software Engineer",
           "company": "Strategist Hub",
           "companyUrl": "",
           "startDate": "07/2025",
@@ -69,7 +57,7 @@
           "companyUrl": "",
           "startDate": "05/2024",
           "endDate": "07/2025",
-          "summary": "<ul><li>Engineered enterprise ERP interfaces for Howick Ltd, a global engineering powerhouse serving customers across 75+ countries.</li><li>Developed real-time production monitoring dashboards utilizing React and Redux, significantly improving reporting visibility and operational throughput.</li><li>Designed and integrated 20+ high-throughput RESTful APIs using Node.js and MongoDB, enforcing highly scalable database structures and clean backend architecture.</li></ul>",
+          "summary": "<ul><li>Developed an ERP system with dashboards, analytics, and reporting features for a global engineering company operating in 75+ countries.</li><li>Developed real-time production monitoring dashboards utilizing React and Redux, significantly improving reporting visibility and operational throughput.</li><li>Designed and integrated 20+ high-throughput RESTful APIs using Node.js and MongoDB, enforcing highly scalable database structures and clean backend architecture.</li></ul>",
           "location": "Lahore, Pakistan"
         }
       ]
@@ -92,7 +80,7 @@
         {
           "id": "c1d2e3f4-5a6b-47c8-9d0e-1f2a3b4c5d6e",
           "name": "Enterprise CRM Platform (Multi-Tenant SaaS)",
-          "description": "<ul><li>Architected a production-grade multi-tenant CRM platform featuring robust contact management, sales pipelines, workflow automation, RBAC, and Stripe billing integrations.</li><li>Designed scalable backend architecture with enterprise-grade security protocols, comprehensive audit logging, and automated reporting.</li><li>Implemented high-concurrency WebSockets, subscription management, and custom workflows to drive modern SaaS business operations.</li></ul>",
+          "description": "<ul><li>Architected a multi-tenant CRM platform featuring robust contact management, sales pipelines, workflow automation, RBAC and Stripe integrations.</li><li>Designed scalable backend architecture with enterprise-grade security protocols, comprehensive audit logging, and automated reporting.</li><li>Implemented high-concurrency WebSockets, subscription management, and custom workflows to drive modern SaaS business operations.</li></ul>",
           "projectUrl": "",
           "githubUrl": "",
           "date": "04/2026",
@@ -101,7 +89,7 @@
         {
           "id": "d1e2f3a4-5b6c-48d9-0e1f-2a3b4c5d6e7f",
           "name": "3D SaaS Portfolio",
-          "description": "<ul><li>Built a high-performance SaaS portfolio platform featuring an integrated CMS and secure admin panel, empowering users to manage and deploy dynamic content via automated routing.</li><li>Developed a distributed full-stack architecture using React, Three.js, Express.js, and SQLite, supporting real-time interactive themes and scalable media uploads.</li></ul>",
+          "description": "<ul><li>Built a SaaS portfolio platform with a CMS and admin panel, allowing users to manage and deploy dynamic portfolio content via routing.</li><li>Developed a distributed full-stack architecture using React, Three.js, Express.js, and SQLite, supporting real-time interactive themes and scalable media uploads.</li></ul>",
           "projectUrl": "",
           "githubUrl": "",
           "date": "11/2024",
@@ -110,7 +98,7 @@
         {
           "id": "e1f2a3b4-5c6d-49e0-1f2a-3b4c5d6e7f8a",
           "name": "Resume Builder SaaS",
-          "description": "<ul><li>Engineered an ATS-focused multi-tenant resume builder providing automated parsing, AI-assisted content optimization, ATS scoring engines, live WYSIWYG previews, and dynamic PDF generation.</li><li>Architected the system utilizing Next.js, TypeScript, Zustand, and Tailwind CSS to deliver ultra-fast, recruiter-friendly templates with real-time semantic validation.</li></ul>",
+          "description": "<ul><li>Developed an ATS-focused resume builder with resume parsing, AI-assisted optimization, ATS scoring, live preview, and PDF generation.</li><li>Built using Next.js, TypeScript, Zustand, and Tailwind CSS to deliver ultra-fast, recruiter-friendly templates with real-time semantic validation.</li></ul>",
           "projectUrl": "",
           "githubUrl": "",
           "date": "10/2025",
