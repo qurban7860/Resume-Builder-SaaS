@@ -1,11 +1,11 @@
 <div align="center">
-  <div align="center">
+  <!-- <div align="center">
     <img src="https://raw.githubusercontent.com/tandpfun/skill-icons/main/icons/NextJS-Dark.svg" width="50" height="50" alt="Next.js"/>
     <img src="https://raw.githubusercontent.com/tandpfun/skill-icons/main/icons/React-Dark.svg" width="50" height="50" alt="React"/>
     <img src="https://raw.githubusercontent.com/tandpfun/skill-icons/main/icons/TypeScript.svg" width="50" height="50" alt="TypeScript"/>
     <img src="https://raw.githubusercontent.com/tandpfun/skill-icons/main/icons/TailwindCSS-Dark.svg" width="50" height="50" alt="Tailwind"/>
   </div>
-  <br />
+  <br /> -->
   <h1 align="center">ResumeBuilder Pro Ecosystem</h1>
   <p align="center">
     <strong>Top 1% FAANG-Standard ATS Resume Builder & Enterprise Asset Generator</strong>
