@@ -73,9 +73,3 @@ npm run dev
 npm run build
 npm run start
 ```
-
-## Notes
-
-- The project builds successfully with `npm run build`.
-- The API route `pages/api/resume/parse.ts` handles PDF/DOCX parsing.
-- The resume editor supports file upload, AI enhancement, and PDF export.
