@@ -65,10 +65,3 @@ ResumeBuilder is a professional-grade resume platform built with Next.js, React,
 npm install
 npm run dev
 ```
-
-## Production build
-
-```bash
-npm run build
-npm run start
-```
