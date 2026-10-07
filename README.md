@@ -10,7 +10,6 @@ ResumeBuilder is a professional-grade resume platform built with Next.js, React,
 - AI-assisted enhancement for bullets, summaries, and keyword suggestions
 - Responsive SaaS-style UI with premium layout, glassmorphism cards, and motion transitions
 - PDF export workflow with server-side and client-side fallback support
-- Recruiter-focused optimization guidance and heatmap visualization
 - Local draft persistence and version snapshots
 
 ## Core product features
