@@ -29,7 +29,7 @@ ResumeBuilder is a professional-grade resume platform built with Next.js, React,
 ### Upload and parse
 - Upload existing resumes in PDF, DOCX, or TXT format
 - Automatic parsing and resume population into the editor
-- On-device parsing with `pdf-parse` and `mammoth`
+- On-device parsing with `pdf-parse`
 
 ### Export
 - A4 PDF export using `html2pdf.js`
