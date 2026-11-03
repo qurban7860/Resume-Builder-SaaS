@@ -51,7 +51,6 @@ ResumeBuilder is a professional-grade resume platform built with Next.js, React,
 - Tailwind CSS
 - Zustand
 - React Hook Form
-- Zod
 - Puppeteer
 - html2pdf.js
 - pdf-parse
